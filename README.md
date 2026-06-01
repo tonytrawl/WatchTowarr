@@ -1,6 +1,6 @@
 <div align="center">
 
-# (https://github.com/tonytrawl/WatchTowarr/blob/main/icon.png?raw=true)🗼 WatchTowarr
+# ![image](https://github.com/tonytrawl/WatchTowarr/blob/main/icon.png?raw=true)🗼 WatchTowarr
 
 **A lightweight Windows dashboard that keeps an eye on your whole media stack and pings your phone the moment something breaks.**
 
