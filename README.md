@@ -48,6 +48,7 @@ You can run it on your server if that suits you better, it just works best off-b
 - Choose **errors only** or **warnings too**
 - **Mute** specific services you don't want alerts for
 - **Quiet hours** so it won't wake you at 3am, and anything overnight arrives as one tidy summary in the morning
+- **Torrent finished alerts** (beta), get a ping like "Dune: Part Two finished downloading" when a download completes, using the clean title from Radarr/Sonarr
 - Send a **test notification** to confirm setup
 
 ### 🔎 Add movies & shows
