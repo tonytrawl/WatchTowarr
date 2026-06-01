@@ -1,6 +1,6 @@
 <div align="center">
 
-# ![image](https://github.com/tonytrawl/WatchTowarr/blob/main/icon-4.png?raw=true) WatchTowarr
+# ![image](https://github.com/tonytrawl/GuardTowarr/blob/main/icon-4.png?raw=true) GuardTowarr
 
 **A lightweight Windows dashboard that keeps an eye on your whole media stack and pings your phone the moment something breaks.**
 
@@ -15,20 +15,20 @@ Monitors **Radarr · Sonarr · Prowlarr · Plex · qBittorrent · Ombi** in one 
 
 ## Download
 
-Grab the latest **`WatchTowarr.exe`** from the [**Releases**](../../releases/latest) page. That's it, no install, no dependencies, no Python required.
+Grab the latest **`GuardTowarr.exe`** from the [**Releases**](../../releases/latest) page. That's it, no install, no dependencies, no Python required.
 
 > **Heads up:** Because the `.exe` isn't code-signed, Windows SmartScreen may warn you on first launch. Click **More info → Run anyway**.
 
 ## Get started in under a minute
 
-1. Download and run **`WatchTowarr.exe`**. It starts in the background with a tray icon (no console window).
-2. Right-click the tray icon → **Open WatchTowarr**, or browse to **http://localhost:8787**.
+1. Download and run **`GuardTowarr.exe`**. It starts in the background with a tray icon (no console window).
+2. Right-click the tray icon → **Open GuardTowarr**, or browse to **http://localhost:8787**.
 3. A setup prompt walks you through your service addresses and API keys. Don't use one of the services? Just toggle it off and it won't bug you again.
-4. Done. WatchTowarr keeps watching in the background.
+4. Done. GuardTowarr keeps watching in the background.
 
 ## Where to run it
 
-WatchTowarr was built to run on your **main PC, not your server**. The whole point is catching downtime, and a monitor running *on* the server goes down *with* the server. Running it on your everyday machine means it can actually tell you when the server or a service becomes unreachable.
+GuardTowarr was built to run on your **main PC, not your server**. The whole point is catching downtime, and a monitor running *on* the server goes down *with* the server. Running it on your everyday machine means it can actually tell you when the server or a service becomes unreachable.
 
 You can run it on your server if that suits you better, it just works best off-box.
 
@@ -93,7 +93,7 @@ You can run it on your server if that suits you better, it just works best off-b
 - **Update notices.** Checks GitHub about once a day and shows a quiet, dismissible card when a new release is available, with release notes and a link to download. Nothing downloads automatically. Turn it off in settings.
 - **Check it from your phone or another device** on the same network, just browse to your PC's address on port `8787`.
 - **Everything is configured in the app.** Settings are organized into tabs (General, Services, Alerts, Beta) and your choices are remembered across restarts.
-- **Your data stays local.** WatchTowarr talks only to your own services and (if you enable it) the ntfy server you choose.
+- **Your data stays local.** GuardTowarr talks only to your own services and (if you enable it) the ntfy server you choose.
 
 ## What gets checked
 
