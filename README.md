@@ -91,7 +91,7 @@ You can run it on your server if that suits you better, it just works best off-b
 
 - **Runs quietly in the system tray.** Right-click the icon to open the dashboard or quit.
 - **Update notices.** Checks GitHub about once a day and shows a quiet, dismissible card when a new release is available, with release notes and a link to download. Nothing downloads automatically. Turn it off in settings.
-- **Check it from your phone or another device** on the same network, just browse to your PC's address on port `8787`.
+- **Check it from your phone or another device** on the same network, just browse to your PC's address on port `9595`.
 - **Everything is configured in the app.** Settings are organized into tabs (General, Services, Alerts, Beta) and your choices are remembered across restarts.
 - **Your data stays local.** GuardTowarr talks only to your own services and (if you enable it) the ntfy server you choose.
 
