@@ -33,7 +33,8 @@ Monitors **Radarr · Sonarr · Prowlarr · Plex · qBittorrent · Ombi** in one 
 </table>
 
 ---
-
+<div align="left">
+  
 ## Windows Download
 
 Grab the latest **`GuardTowarr.exe`** from the [**Releases**](../../releases/latest) page. That's it, no install, no dependencies, no Python required.
