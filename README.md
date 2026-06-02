@@ -94,7 +94,7 @@ You can run it on your server if that suits you better, it just works best off-b
 
 ### 📱 Phone alerts
 
-* Push notifications via [**ntfy**](https://ntfy.sh) (free, no account needed) when something breaks, and again when it recovers
+* Push notifications via [**ntfy**](https://ntfy.sh) (free, no account needed), and/or Discord (using webhook) when something breaks, and again when it recovers
 * Only alerts on real changes, so no spam every 30 seconds while something stays down
 * Choose **errors only** or **warnings too**
 * **Mute** specific services you don't want alerts for
