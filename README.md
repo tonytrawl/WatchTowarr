@@ -41,19 +41,6 @@ Grab the latest **`GuardTowarr.exe`** from the [**Releases**](../../releases/lat
 
 > **Heads up:** Because the `.exe` isn't code-signed, Windows SmartScreen may warn you on first launch. Click **More info → Run anyway**.
 
-## Get started in under a minute
-
-1. Download and run **`GuardTowarr.exe`**. It starts in the background with a tray icon (no console window).
-2. Right-click the tray icon → **Open GuardTowarr**, or browse to **http://localhost:9595**.
-3. A setup prompt walks you through your service addresses and API keys. Don't use one of the services? Just toggle it off and it won't bug you again.
-4. Done. GuardTowarr keeps watching in the background.
-
-## Where to run it
-
-GuardTowarr was built to run on your **main PC, not your server**. The whole point is catching downtime, and a monitor running *on* the server goes down *with* the server. Running it on your everyday machine means it can actually tell you when the server or a service becomes unreachable.
-
-You can run it on your server if that suits you better, it just works best off-box.
-
 ## Docker
 
 Prefer containers? GuardTowarr is on Docker Hub as **`tonytrawl/guardtowarr`**.
@@ -80,6 +67,21 @@ Then `docker compose up -d` and open `http://<host>:9595`.
 Settings, dismissed issues, and history persist in the mounted `./config` volume. The system-tray feature is desktop-only and isn't part of the Docker image; the container just runs in the background like any other service.
 
 \---
+
+## Get started in under a minute
+
+1. Download and run **`GuardTowarr.exe`**. It starts in the background with a tray icon (no console window).
+2. Right-click the tray icon → **Open GuardTowarr**, or browse to **http://localhost:9595**.
+3. A setup prompt walks you through your service addresses and API keys. Don't use one of the services? Just toggle it off and it won't bug you again.
+4. Done. GuardTowarr keeps watching in the background.
+
+## Where to run it
+
+GuardTowarr was built to run on your **main PC, not your server**. The whole point is catching downtime, and a monitor running *on* the server goes down *with* the server. Running it on your everyday machine means it can actually tell you when the server or a service becomes unreachable.
+
+You can run it on your server if that suits you better, it just works best off-box.
+
+
 
 ## What it does
 
