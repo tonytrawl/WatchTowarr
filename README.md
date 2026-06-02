@@ -22,7 +22,7 @@ Grab the latest **`GuardTowarr.exe`** from the [**Releases**](../../releases/lat
 ## Get started in under a minute
 
 1. Download and run **`GuardTowarr.exe`**. It starts in the background with a tray icon (no console window).
-2. Right-click the tray icon → **Open GuardTowarr**, or browse to **http://localhost:8787**.
+2. Right-click the tray icon → **Open GuardTowarr**, or browse to **http://localhost:9595**.
 3. A setup prompt walks you through your service addresses and API keys. Don't use one of the services? Just toggle it off and it won't bug you again.
 4. Done. GuardTowarr keeps watching in the background.
 
