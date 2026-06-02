@@ -10,7 +10,27 @@ Monitors **Radarr · Sonarr · Prowlarr · Plex · qBittorrent · Ombi** in one 
 [![Download](https://img.shields.io/badge/download-latest%20release-e5a00d)](../../releases/latest)
 [![Buy me a Coffee](https://img.shields.io/badge/Support%20My%20Work-Buy%20me%20a%20coffee%20%E2%98%95-chocolate?style=plastic)](https://buymeacoffee.com/tonytrawl)
 
-</div>
+<table>
+  <!-- First Row of Images -->
+  <tr>
+    <td align="center" width="50%">
+      <img src="https://github.com/tonytrawl/GuardTowarr/blob/main/Dashboard%20clear.png?raw=true" alt="" width="100%">
+    </td>
+     <td align="center" width="50%">
+      <img src="https://github.com/tonytrawl/GuardTowarr/blob/main/dashboard%20error.png?raw=true" alt="" width="100%">
+    </td>
+  </tr>
+  
+  <!-- Second Row of Images -->
+  <tr>
+     <td align="center" width="35%">
+      <img src="https://github.com/tonytrawl/GuardTowarr/blob/main/Mobile%20All%20clear%20view.png?raw=true" alt="" width="35%">
+    </td>
+    <td align="center" width="50%">
+      <img src="https://github.com/tonytrawl/GuardTowarr/blob/main/movie%20search.png?raw=true" alt="" width="100%">
+    </td>
+  </tr>
+</table>
 
 ---
 
