@@ -4,7 +4,7 @@
 
 **A lightweight dashboard that keeps an eye on your whole media stack and pings your phone the moment something breaks.**
 
-Monitors **Radarr · Sonarr · Prowlarr · Plex · qBittorrent · Ombi** in one place.
+Monitors **Radarr · Sonarr · Prowlarr · Readarr · Lidarr · Plex · Jellyfin · qBittorrent · Ombi · Overseerr · Jellyseerr** in one place.
 
 [![Docker Link](https://img.shields.io/badge/Docker-repo-blue?logo=docker)](https://hub.docker.com/r/tonytrawl/guardtowarr)
 [![Download](https://img.shields.io/badge/download-latest%20release-e5a00d)](../../releases/latest)
@@ -71,13 +71,12 @@ Settings, dismissed issues, and history persist in the mounted `./config` volume
 ---
 
 ## What it does
-
+ 
 ### 🩺 Monitoring
 - One clean view of every service: **healthy**, **warning**, or **error**
 - Surfaces the *arr apps' own internal health warnings, not just whether they're online
-- Checks on a timer (default 30s) with a manual refresh button anytime
+- Checks on a timer (default 60s) with a manual refresh button anytime
 - **Don't use a service?** Disable it and it disappears from the dashboard and stops being checked
-
 ### 📱 Phone alerts
 - Push notifications via [**ntfy**](https://ntfy.sh) (free, no account needed) when something breaks, and again when it recovers
 - Only alerts on real changes, so no spam every 30 seconds while something stays down
@@ -86,60 +85,60 @@ Settings, dismissed issues, and history persist in the mounted `./config` volume
 - **Quiet hours** so it won't wake you at 3am, and anything overnight arrives as one tidy summary in the morning
 - **Torrent finished alerts** (beta), get a ping like "Dune: Part Two finished downloading" when a download completes, using the clean title from Radarr/Sonarr
 - Send a **test notification** to confirm setup
-
-### 🔎 Add movies & shows
+### 🔎 Add movies, shows, books & music
 - Built-in search with **poster previews**
-- Pick something, confirm the **quality profile**, and it's sent to Radarr or Sonarr to grab
+- Search **movies** (Radarr), **shows** (Sonarr), **books** (Readarr), and **music** (Lidarr)
+- Pick something, confirm the **quality profile**, and it's sent to the right app to grab
+- Search options only appear for the apps you've set up and enabled
 - Remembers your usual quality profile so you're not setting it every time
 - No extra API keys needed, it reuses the apps you've already connected
-
 ### 📊 History & uptime
 - Logs every time a service goes down and recovers, kept for **30 days**
 - See real numbers like *"Radarr has gone down 4 times this week"* instead of guessing
 - Great for catching a flaky service before it becomes a real headache
-
 ### 📈 Live stats
 - When everything's healthy, the dashboard shows a calm **all-clear** screen with stats right below it
 - **Library counts** (movies, episodes), **active torrents**, and **uptime %** at a glance
-- **Now playing on Plex** — who's watching what, direct play vs transcode, with progress
+- **Now playing on Plex and/or Jellyfin** — who's watching what, direct play vs transcode, with progress and a tag showing which server it's on
+- **Transcode vs. direct-play breakdown**, and **per-server library counts** when both media servers are running
 - **Per-drive storage** bars that turn amber then red as a drive fills up
-- A 24-hour **Plex streams** graph
+- A 24-hour **streams** graph
 - When there are issues, the cards take over and stats move to a one-click button in the header
-
 ### 🎨 Customization
 - **Light and dark mode**, dark is a clean Plex-style grey, not harsh black (the logo even goes minimal monotone in dark)
 - **Custom color palette**, set your own accent, background, and card colors with a live preview
 - **Hide** services from view without fully disabling them
-- Optional **summary bar** for a compact overview up top
 - **Dismiss** issues you already know about so they stop nagging, and you can restore them anytime
 - **Click any service** to jump straight to its web UI
 - **Keyboard shortcuts**: `/` search · `r` refresh · `s` settings · `h` history
 - Optional **sound + on-screen flash** when something newly breaks (bring your own sound if you like)
-
-### 🌀 Active torrents (beta)
-- Optional view of what's **downloading** and **seeding**, switchable between the two
+### 🌀 Active torrents
+- View of what's **downloading** and **seeding**, switchable between the two
 - Full detail if you use **qBittorrent**
 - No qBittorrent? It falls back to the **Radarr/Sonarr download queue**, so it still works with whatever client you use (Transmission, Deluge, etc.)
-
 ---
-
+ 
 ## Good to know
-
+ 
 - **Runs quietly in the system tray.** Right-click the icon to open the dashboard or quit.
 - **Update notices.** Checks GitHub about once a day and shows a quiet, dismissible card when a new release is available, with release notes and a link to download. Nothing downloads automatically. Turn it off in settings.
 - **Check it from your phone or another device** on the same network, just browse to your PC's address on port `9595`.
 - **Everything is configured in the app.** Settings are organized into tabs (General, Services, Alerts, Beta) and your choices are remembered across restarts.
 - **Your data stays local.** GuardTowarr talks only to your own services and (if you enable it) the ntfy server you choose.
-
 ## What gets checked
-
+ 
+GuardTowarr doesn't just ping a port. For each service it logs in with your credentials and reads that app's own status and health endpoints, so it catches things that are technically "up" but quietly broken.
+ 
 | Service | What it watches |
 |---|---|
-| **Radarr / Sonarr / Prowlarr** | Reachability + the app's own internal health warnings |
-| **Plex** | Server reachability and whether libraries respond |
-| **qBittorrent** | Online status + torrents stuck in error/stalled/missing states |
-| **Ombi** | Whether the service is reachable |
-
+| **Radarr / Sonarr / Prowlarr / Readarr / Lidarr** | Reachability + the app's own internal health checks (missing root folders, no indexers, download client problems, update issues, etc.), each linked to the relevant wiki fix |
+| **Plex** | Server reachability, token validity, and whether libraries respond (distinguishes "down" from "up but libraries not responding") |
+| **Jellyfin** _(beta)_ | Server reachability + API key validity; also feeds the live now-playing view |
+| **qBittorrent** | Online status, bad-credential detection, and torrents stuck in error / missing-files / stalled states |
+| **Ombi / Overseerr / Jellyseerr** | Reachability + API key validity via the status endpoint |
+ 
+Every service reports one of three states — healthy, warning, or error — with real outages kept separate from minor warnings. Any issue can be dismissed and stays hidden until it recurs.
+ 
 ---
 
 ## Platform
