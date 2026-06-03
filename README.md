@@ -2,7 +2,7 @@
 
 # ![image](https://github.com/tonytrawl/GuardTowarr/blob/main/icon-4.png?raw=true) GuardTowarr
 
-**A lightweight Windows dashboard that keeps an eye on your whole media stack and pings your phone the moment something breaks.**
+**A lightweight dashboard that keeps an eye on your whole media stack and pings your phone the moment something breaks.**
 
 Monitors **Radarr · Sonarr · Prowlarr · Plex · qBittorrent · Ombi** in one place.
 
