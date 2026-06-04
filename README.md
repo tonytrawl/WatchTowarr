@@ -45,7 +45,7 @@ Grab the latest **`GuardTowarr.exe`** from the [**Releases**](../../releases/lat
 
 Prefer containers? GuardTowarr is on Docker Hub as **`tonytrawl/guardtowarr`**.
 
-The Docker image is the cross-platform way to run GuardTowarr — it runs anywhere Docker does, **including Linux servers, NAS devices (Synology/unRAID/etc.), and Windows/macOS**. You do **not** need Windows to run the container; the "Windows only" note further down applies only to the standalone `.exe` desktop build.
+The Docker image is the cross-platform way to run GuardTowarr — it runs anywhere Docker does, **including Linux servers, NAS devices (Synology/unRAID/etc.), and Windows/macOS**. You do **not** need Windows to run the container.
 
 ```yaml
 services:
@@ -77,8 +77,8 @@ Settings, dismissed issues, and history persist in the mounted `./config` volume
 - Surfaces the *arr apps' own internal health warnings, not just whether they're online
 - Checks on a timer (default 60s) with a manual refresh button anytime
 - **Don't use a service?** Disable it and it disappears from the dashboard and stops being checked
-### 📱 Phone alerts
-- Push notifications via [**ntfy**](https://ntfy.sh) (free, no account needed) when something breaks, and again when it recovers
+### 📱 Phone & chat alerts
+- Get pinged when something breaks (and again when it recovers) via any mix of **[ntfy](https://ntfy.sh)** (free phone push, no account needed), **Discord** (channel webhook), or **[Pushover](https://pushover.net)** — turn on one channel or several
 - Only alerts on real changes, so no spam every 30 seconds while something stays down
 - Choose **errors only** or **warnings too**
 - **Mute** specific services you don't want alerts for
@@ -104,6 +104,7 @@ Settings, dismissed issues, and history persist in the mounted `./config` volume
 - **Per-drive storage** bars that turn amber then red as a drive fills up
 - A 24-hour **streams** graph
 - When there are issues, the cards take over and stats move to a one-click button in the header
+- **Lite stats mode** (beta) — running everything on a low-power box like a Pi or NAS? Switch the stats panel to a lightweight uptime-only view to cut background load on your servers. Monitoring, warnings and alerts are completely unaffected
 ### 🎨 Customization
 - **Light and dark mode**, dark is a clean Plex-style grey, not harsh black (the logo even goes minimal monotone in dark)
 - **Custom color palette**, set your own accent, background, and card colors with a live preview
@@ -124,7 +125,7 @@ Settings, dismissed issues, and history persist in the mounted `./config` volume
 - **Update notices.** Checks GitHub about once a day and shows a quiet, dismissible card when a new release is available, with release notes and a link to download. Nothing downloads automatically. Turn it off in settings.
 - **Check it from your phone or another device** on the same network, just browse to your PC's address on port `9595`.
 - **Everything is configured in the app.** Settings are organized into tabs (General, Services, Alerts, Beta) and your choices are remembered across restarts.
-- **Your data stays local.** GuardTowarr talks only to your own services and (if you enable it) the ntfy server you choose.
+- **Your data stays local.** GuardTowarr talks only to your own services and, if you turn on alerts, the notification service you choose (ntfy, Discord, or Pushover). Pushover and Discord use your own account/webhook — nothing routes through us.
 ## What gets checked
  
 GuardTowarr doesn't just ping a port. For each service it logs in with your credentials and reads that app's own status and health endpoints, so it catches things that are technically "up" but quietly broken.
@@ -146,7 +147,7 @@ Every service reports one of three states — healthy, warning, or error — wit
 - **Docker image** — runs anywhere Docker does: **Linux, NAS (Synology/unRAID), Windows, macOS.** This is the recommended way to run it on a server. See the [Docker](#docker) section above.
 - **Standalone `.exe`** — **Windows only.** This is the desktop build with the system-tray icon, for running on your everyday Windows PC.
 
-So: if you're on Linux or a NAS, use Docker — it's fully supported. The native desktop app is Windows-only for now; a native Linux build may follow if there's interest. Either way, open an issue and let me know what you're running.
+So: if you're on Linux, use Docker — it's fully supported. The native desktop app is Windows-only for now; a native MacOs build may follow if there's interest. Either way, open an issue and let me know what you're running.
 
 ## Feedback
 
