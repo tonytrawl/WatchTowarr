@@ -8,6 +8,7 @@ Monitors **Radarr · Sonarr · Prowlarr · Readarr · Lidarr · Plex · Jellyfin
 
 [![Docker Link](https://img.shields.io/badge/Docker-repo-blue?logo=docker)](https://hub.docker.com/r/tonytrawl/guardtowarr)
 [![Download](https://img.shields.io/badge/download-latest%20release-e5a00d)](../../releases/latest)
+[![Reddit](https://img.shields.io/badge/Reddit-Reddit?logo=reddit)](https://www.reddit.com/r/guardtowarr/)
 [![Buy me a Coffee](https://img.shields.io/badge/Support%20My%20Work-Buy%20me%20a%20coffee%20%E2%98%95-chocolate?style=plastic)](https://buymeacoffee.com/tonytrawl)
 
 <table>
