@@ -16,20 +16,20 @@ Monitors **Radarr · Sonarr · Prowlarr · Readarr · Lidarr · Plex · Jellyfin
   <!-- First Row of Images -->
   <tr>
     <td align="center" width="50%">
-      <img src="https://github.com/tonytrawl/GuardTowarr/blob/main/Dashboard%20clear.png?raw=true" alt="" width="100%">
+      <img src="https://github.com/tonytrawl/GuardTowarr/blob/main/screenshots/Dashboard%20clear.png?raw=true" alt="" width="100%">
     </td>
      <td align="center" width="50%">
-      <img src="https://github.com/tonytrawl/GuardTowarr/blob/main/dashboard%20error.png?raw=true" alt="" width="100%">
+      <img src="https://github.com/tonytrawl/GuardTowarr/blob/main/screenshots/Dashboard%20Error.png?raw=true" alt="" width="100%">
     </td>
   </tr>
 
   <!-- Second Row of Images -->
   <tr>
      <td align="center" width="35%">
-      <img src="https://github.com/tonytrawl/GuardTowarr/blob/main/Mobile%20All%20clear%20view.png?raw=true" alt="" width="35%">
+      <img src="https://github.com/tonytrawl/GuardTowarr/blob/main/screenshots/Mobile%20error%20view.png?raw=true" alt="" width="35%">
     </td>
     <td align="center" width="50%">
-      <img src="https://github.com/tonytrawl/GuardTowarr/blob/main/movie%20search.png?raw=true" alt="" width="100%">
+      <img src="https://github.com/tonytrawl/GuardTowarr/blob/main/screenshots/Quick%20Fix.png?raw=true" alt="" width="100%">
     </td>
   </tr>
 </table>
