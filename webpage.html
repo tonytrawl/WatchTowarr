@@ -1,0 +1,2361 @@
+<!DOCTYPE html>
+<!--
+  GuardTowarr - web dashboard
+  Copyright (C) 2026 tonytrawl
+  Licensed under the GNU General Public License v3.0 or later. See LICENSE.
+-->
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>GuardTowarr</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23e5a00d'/%3E%3Cpath d='M16 5l3 4h-6l3-4zM12 9h8l-1 4h-6l-1-4zM13 13h6l1 14h-3l-1-9-1 9h-3l1-14z' fill='%23151719'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --green:#3bb85a; --amber:#e5a00d; --red:#e5484d; --blue:#e5a00d; /* Plex gold accent */
+    --radius:22px; --radius-sm:14px;
+    --ease:cubic-bezier(.32,.72,0,1);
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  /* LIGHT (default) */
+  :root, [data-theme="light"]{
+    --bg:#f5f5f7; --bg-grad-1:#eef1f6; --bg-grad-2:#f7f7fa;
+    --card:rgba(255,255,255,.72); --card-solid:#fff; --card-border:rgba(0,0,0,.08);
+    --text:#1d1d1f; --text-2:#55555a; --hairline:rgba(0,0,0,.1);
+    --fill:rgba(118,118,128,.16); --fill-2:rgba(118,118,128,.1);
+    --shadow:0 1px 3px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.06);
+    --overlay-bg:rgba(0,0,0,.28);
+    --bg-glow:rgba(229,160,13,.04);
+    --badge-ok:#1a8a3a; --badge-warn:#9a5a00; --badge-err:#c1271e;
+  }
+  /* DARK: Plex-style warm charcoal greys */
+  [data-theme="dark"]{
+    --bg:#1b1c1d; --bg-grad-1:#232425; --bg-grad-2:#1f2021;
+    --card:rgba(40,42,45,.82); --card-solid:#282a2d; --card-border:rgba(255,255,255,.07);
+    --text:#eeeeee; --text-2:#9a9b9c; --hairline:rgba(255,255,255,.08);
+    --fill:rgba(255,255,255,.07); --fill-2:rgba(255,255,255,.04);
+    --shadow:0 1px 3px rgba(0,0,0,.3),0 8px 28px rgba(0,0,0,.45);
+    --overlay-bg:rgba(0,0,0,.6);
+    --bg-glow:rgba(229,160,13,.06);
+    --badge-ok:#6cd987; --badge-warn:#e5a00d; --badge-err:#ff6166;
+  }
+  /* AUTO follows system */
+  @media (prefers-color-scheme:dark){
+    [data-theme="auto"]{
+      --bg:#1b1c1d; --bg-grad-1:#232425; --bg-grad-2:#1f2021;
+      --card:rgba(40,42,45,.82); --card-solid:#282a2d; --card-border:rgba(255,255,255,.07);
+      --text:#eeeeee; --text-2:#9a9b9c; --hairline:rgba(255,255,255,.08);
+      --fill:rgba(255,255,255,.07); --fill-2:rgba(255,255,255,.04);
+      --shadow:0 1px 3px rgba(0,0,0,.3),0 8px 28px rgba(0,0,0,.45);
+      --overlay-bg:rgba(0,0,0,.6);
+      --bg-glow:rgba(229,160,13,.06);
+      --badge-ok:#6cd987; --badge-warn:#e5a00d; --badge-err:#ff6166;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:var(--font);color:var(--text);
+    background:
+      radial-gradient(900px 500px at 50% -5%, var(--bg-glow), transparent 60%),
+      radial-gradient(1200px 600px at 80% -10%, var(--bg-grad-1), transparent 60%),
+      radial-gradient(1000px 700px at -10% 110%, var(--bg-grad-2), transparent 55%),
+      var(--bg);
+    background-attachment:fixed;min-height:100vh;
+    padding:max(env(safe-area-inset-top),20px) clamp(16px,5vw,56px) 60px;
+    line-height:1.47;-webkit-font-smoothing:antialiased;letter-spacing:-.01em;
+    transition:background .4s ease,color .4s ease;
+  }
+  .wrap{max-width:1180px;margin:0 auto}
+
+  header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;
+    padding:clamp(18px,4vw,40px) 0 clamp(14px,2vw,22px)}
+  .title{display:flex;align-items:center;gap:14px;min-width:0}
+  .glyph{width:clamp(40px,9vw,52px);height:clamp(40px,9vw,52px);border-radius:30%;
+    display:grid;place-items:center;flex:none;transition:background .4s ease,box-shadow .4s ease}
+  .glyph svg{width:62%;height:62%}
+  /* LIGHT: gold tile, solid dark watchtower (matches favicon / exe icon) */
+  .glyph{background:linear-gradient(145deg,#e5a00d,#f5c518);box-shadow:0 6px 18px rgba(229,160,13,.4)}
+  .glyph .tw-roof,.glyph .tw-body,.glyph .tw-base{fill:#151719}
+  .glyph .tw-watch{stroke:#e5a00d;stroke-width:1.6;stroke-linecap:round}
+  /* DARK: minimalist monotone: muted tile, clean line-art tower */
+  [data-theme="dark"] .glyph{background:var(--fill);box-shadow:none;border:.5px solid var(--card-border)}
+  [data-theme="dark"] .glyph .tw-roof,[data-theme="dark"] .glyph .tw-body,
+  [data-theme="dark"] .glyph .tw-base{fill:none;stroke:var(--text);stroke-width:1.4;
+    stroke-linejoin:round;stroke-linecap:round}
+  [data-theme="dark"] .glyph .tw-watch{stroke:var(--text-2);stroke-width:1.4;stroke-linecap:round}
+  @media (prefers-color-scheme:dark){
+    [data-theme="auto"] .glyph{background:var(--fill);box-shadow:none;border:.5px solid var(--card-border)}
+    [data-theme="auto"] .glyph .tw-roof,[data-theme="auto"] .glyph .tw-body,
+    [data-theme="auto"] .glyph .tw-base{fill:none;stroke:var(--text);stroke-width:1.4;
+      stroke-linejoin:round;stroke-linecap:round}
+    [data-theme="auto"] .glyph .tw-watch{stroke:var(--text-2);stroke-width:1.4;stroke-linecap:round}
+  }
+  h1{font-size:clamp(24px,6vw,38px);font-weight:700;letter-spacing:-.025em}
+  .sub{color:var(--text-2);font-size:clamp(12px,3.2vw,14px);font-weight:500;margin-top:1px}
+
+  .hdr-actions{display:flex;align-items:center;gap:8px}
+  .icon-btn{width:42px;height:42px;border-radius:50%;border:.5px solid var(--card-border);
+    background:var(--card);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+    display:grid;place-items:center;cursor:pointer;color:var(--text);
+    transition:transform .2s var(--ease),background .2s}
+  .icon-btn:active{transform:scale(.9)}
+  .icon-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .icon-btn.spin svg{animation:spin .8s var(--ease)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* search bar (slides in) */
+  .searchbar{
+    max-height:0;overflow:hidden;opacity:0;
+    transition:max-height .45s var(--ease),opacity .35s var(--ease),margin .45s var(--ease);
+    margin-bottom:0;
+  }
+  .searchbar.open{max-height:120px;opacity:1;margin-bottom:clamp(16px,3vw,22px)}
+  .search-inner{display:flex;align-items:center;gap:10px;background:var(--card);border:.5px solid var(--card-border);
+    border-radius:var(--radius);padding:8px 10px 8px 18px;box-shadow:var(--shadow);
+    backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px)}
+  .search-inner svg.mag{width:20px;height:20px;fill:none;stroke:var(--text-2);stroke-width:1.8;flex:none}
+  .search-inner input{flex:1;border:none;background:none;outline:none;font-family:var(--font);
+    font-size:clamp(15px,4vw,17px);color:var(--text);padding:8px 0;letter-spacing:-.01em}
+  .search-inner input::placeholder{color:var(--text-2)}
+  .kind-seg{display:inline-flex;background:var(--fill);border-radius:10px;padding:3px;gap:2px;flex:none}
+  .kind-seg button{border:none;background:transparent;color:var(--text);font-family:var(--font);
+    font-size:13px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;transition:.2s var(--ease)}
+  .kind-seg button.active{background:var(--card-solid);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+  .search-close{border:none;background:var(--fill);color:var(--text);width:34px;height:34px;border-radius:50%;
+    cursor:pointer;font-size:18px;flex:none;display:grid;place-items:center;transition:.2s var(--ease)}
+  .search-close:active{transform:scale(.9)}
+
+  /* search results grid */
+  .results{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));
+    gap:clamp(12px,2.4vw,18px);animation:rise .4s var(--ease) both}
+  .poster{background:var(--card);border:.5px solid var(--card-border);border-radius:var(--radius-sm);
+    overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .35s var(--ease);position:relative}
+  @media(hover:hover){.poster:hover{transform:translateY(-4px) scale(1.02)}}
+  .poster .img{aspect-ratio:2/3;background:var(--fill) center/cover no-repeat;display:grid;place-items:center}
+  .poster .img.ph{color:var(--text-2);font-size:30px}
+  .poster .meta{padding:10px 11px}
+  .poster .pt{font-size:13.5px;font-weight:600;letter-spacing:-.01em;line-height:1.3;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .poster .py{font-size:12px;color:var(--text-2);margin-top:2px}
+  .poster .tag{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);color:#fff;
+    font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;backdrop-filter:blur(8px)}
+  .poster.added .tag{background:var(--green)}
+  .search-status{color:var(--text-2);font-size:14px;padding:18px 4px;text-align:center}
+
+  /* monitor area hides during search */
+  .monitor-area{transition:opacity .3s var(--ease)}
+  .monitor-area.hidden{display:none}
+  .hidden{display:none !important}
+
+  /* hero */
+  .hero{display:flex;align-items:center;gap:14px;background:var(--card);border:.5px solid var(--card-border);
+    border-radius:var(--radius);padding:clamp(16px,4vw,22px) clamp(18px,4vw,26px);box-shadow:var(--shadow);
+    backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+    margin-bottom:clamp(18px,3vw,26px)}
+  .hero-icon{width:clamp(40px,10vw,54px);height:clamp(40px,10vw,54px);border-radius:50%;flex:none;
+    display:grid;place-items:center;font-size:clamp(20px,5vw,26px);transition:background .4s var(--ease)}
+  .hero-icon.ok{background:rgba(52,199,89,.16)} .hero-icon.warn{background:rgba(255,159,10,.16)} .hero-icon.err{background:rgba(255,59,48,.16)}
+  .hero-text .l1{font-size:clamp(17px,4.4vw,21px);font-weight:600;letter-spacing:-.02em}
+  .hero-text .l2{color:var(--text-2);font-size:clamp(12px,3.2vw,14px);margin-top:1px}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:clamp(16px,3vw,24px)}
+  .seg{display:inline-flex;background:var(--fill);border-radius:11px;padding:3px;gap:2px}
+  .seg button{border:none;background:transparent;color:var(--text);font-family:var(--font);font-size:14px;
+    font-weight:500;padding:7px 15px;border-radius:9px;cursor:pointer;transition:.25s var(--ease)}
+  .seg button.active{background:var(--card-solid);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+  .btn{border:none;font-family:var(--font);font-size:14px;font-weight:500;padding:9px 17px;border-radius:11px;
+    cursor:pointer;background:var(--fill);color:var(--text);transition:transform .2s var(--ease),opacity .2s}
+  .btn:active{transform:scale(.96)} .btn.tint{background:var(--blue);color:#1b1c1d;font-weight:600} .btn:disabled{opacity:.4;cursor:default}
+  .spacer{flex:1}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:clamp(12px,2.4vw,18px)}
+  .card{background:var(--card);border:.5px solid var(--card-border);border-radius:var(--radius);
+    padding:clamp(18px,4vw,24px);box-shadow:var(--shadow);backdrop-filter:saturate(180%) blur(20px);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);animation:rise .6s var(--ease) both}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media(hover:hover){.card:hover{transform:translateY(-3px);box-shadow:0 2px 6px rgba(0,0,0,.06),0 16px 40px rgba(0,0,0,.1)}}
+  .card.err{box-shadow:var(--shadow),0 0 0 1px rgba(255,59,48,.4)}
+  .ch{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+  .svc{font-size:clamp(18px,4.6vw,21px);font-weight:600;letter-spacing:-.02em;text-transform:capitalize}
+  a.svc-link{color:var(--text);text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+  a.svc-link:hover{color:var(--blue)}
+  a.svc-link .ext{font-size:13px;opacity:0;transition:opacity .2s}
+  a.svc-link:hover .ext{opacity:.7}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:5px 11px;border-radius:20px}
+  .badge .d{width:7px;height:7px;border-radius:50%}
+  .badge.ok{background:rgba(52,199,89,.14);color:var(--badge-ok)} .badge.ok .d{background:var(--green)}
+  .badge.warn{background:rgba(255,159,10,.16);color:var(--badge-warn)} .badge.warn .d{background:var(--amber)}
+  .badge.err{background:rgba(255,59,48,.14);color:var(--badge-err)} .badge.err .d{background:var(--red)}
+  .badge.setup{background:var(--fill);color:var(--text-2)} .badge.setup .d{background:var(--text-2)}
+  .summary{color:var(--text-2);font-size:clamp(14px,3.6vw,15px)}
+  .checked{color:var(--text-2);font-size:12px;margin-top:4px;opacity:.8}
+  .setup-row{margin-top:14px}
+  .issues{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+  .hr{height:.5px;background:var(--hairline);margin:14px 0 0}
+  .issue{background:var(--fill);border-radius:var(--radius-sm);padding:12px 13px;display:flex;gap:11px;
+    align-items:flex-start;transition:opacity .3s var(--ease)}
+  .issue.dismissed{opacity:.5}
+  .issue .stripe{width:3px;align-self:stretch;border-radius:3px;flex:none;background:var(--amber)}
+  .issue.error .stripe{background:var(--red)}
+  .issue-body{flex:1;min-width:0}
+  .issue-src{font-size:12px;font-weight:600;color:var(--blue)}
+  .issue-msg{font-size:13.5px;margin-top:2px;word-wrap:break-word;overflow-wrap:anywhere}
+  .issue-msg em{color:var(--text-2);font-style:normal;font-size:12px}
+  .issue-fix{font-size:12.5px;margin-top:5px}
+  .issue-fix a{color:var(--blue);text-decoration:none;font-weight:500}
+  .issue-act{margin-top:11px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .link-btn{border:none;background:none;cursor:pointer;font-family:var(--font);font-size:13px;font-weight:500;color:var(--blue);padding:2px 0}
+  .link-btn.danger{color:var(--red)}
+  .link-btn:active{opacity:.5}
+  /* inside an issue, the fix/dismiss links get an outlined pill so they read as
+     buttons (same hairline + fill language as .chip / .btn elsewhere) */
+  .issue-act .link-btn{border:.5px solid var(--card-border);background:var(--fill-2);
+    border-radius:20px;padding:6px 13px;
+    transition:background .2s var(--ease),transform .2s var(--ease),border-color .2s var(--ease)}
+  .issue-act .link-btn:active{transform:scale(.96);opacity:1}
+  .issue-act .link-btn.danger{border-color:rgba(229,72,77,.45);background:rgba(229,72,77,.06)}
+  @media(hover:hover){
+    .issue-act .link-btn:hover{background:var(--fill)}
+    .issue-act .link-btn.danger:hover{background:rgba(229,72,77,.12)}
+  }
+
+  footer{text-align:center;color:var(--text-2);font-size:12.5px;margin-top:clamp(30px,6vw,50px);opacity:.8}
+
+  /* modal */
+  .overlay{position:fixed;inset:0;background:var(--overlay-bg);backdrop-filter:blur(3px);
+    display:none;align-items:flex-start;justify-content:center;padding:max(env(safe-area-inset-top),28px) 16px 40px;
+    overflow:auto;z-index:60}
+  .overlay.show{display:flex}
+  .modal{background:var(--card-solid);border:.5px solid var(--card-border);border-radius:26px;max-width:560px;
+    width:100%;padding:clamp(20px,5vw,30px);box-shadow:0 20px 70px rgba(0,0,0,.4);animation:pop .4s var(--ease) both}
+  @keyframes pop{from{opacity:0;transform:scale(.96) translateY(12px)}to{opacity:1;transform:none}}
+  .modal h2{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:3px}
+  .modal .msub{color:var(--text-2);font-size:14px;margin-bottom:18px}
+  /* onboarding service picker */
+  .pick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:6px}
+  @media (max-width:520px){ .pick-grid{grid-template-columns:1fr} }
+  .pick{display:flex;align-items:center;gap:11px;padding:13px 15px;border-radius:14px;cursor:pointer;
+    background:var(--fill-2);border:1.5px solid transparent;transition:border-color .15s,background .15s,transform .1s;
+    user-select:none}
+  .pick:hover{background:var(--fill)}
+  .pick:active{transform:scale(.99)}
+  .pick.on{border-color:var(--blue);background:rgba(229,160,13,.10)}
+  .pick .pick-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--card-border);flex:none;
+    display:grid;place-items:center;color:#fff;transition:background .15s,border-color .15s}
+  .pick.on .pick-check{background:var(--blue);border-color:var(--blue)}
+  .pick .pick-check svg{width:13px;height:13px;opacity:0;transition:opacity .15s}
+  .pick.on .pick-check svg{opacity:1}
+  .pick .pick-name{font-weight:600;font-size:15px;text-transform:capitalize}
+  .pick .pick-type{font-size:11.5px;color:var(--text-2);margin-top:1px}
+  .mhead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:5px;letter-spacing:-.01em}
+  .field input, .field select{width:100%;font-family:var(--font);font-size:15px;color:var(--text);
+    background:var(--fill-2);border:.5px solid var(--card-border);border-radius:12px;padding:11px 13px;outline:none;
+    transition:border .2s}
+  .field input:focus{border-color:var(--blue)}
+  .group{border:.5px solid var(--card-border);border-radius:18px;padding:16px;margin-bottom:14px;background:var(--fill-2)}
+  .group-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+  .group-h .gname{font-size:16px;font-weight:600;text-transform:capitalize}
+  .group-fields{margin-top:12px}
+  .group-fields.collapsed{display:none}
+  .row2{display:flex;gap:10px;flex-wrap:wrap}
+  .row2 > *{flex:1;min-width:120px}
+
+  /* toggle switch */
+  .switch{position:relative;width:50px;height:30px;flex:none}
+  .switch input{opacity:0;width:0;height:0}
+  .switch .track{position:absolute;inset:0;background:var(--fill);border-radius:30px;transition:.3s var(--ease)}
+  .switch .track:before{content:"";position:absolute;width:26px;height:26px;left:2px;top:2px;background:#fff;
+    border-radius:50%;transition:.3s var(--ease);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .switch input:checked + .track{background:var(--green)}
+  .switch input:checked + .track:before{transform:translateX(20px)}
+  .toggle-line{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0}
+  .toggle-line .tl-text{font-size:14px}
+  .toggle-line .tl-sub{font-size:12px;color:var(--text-2)}
+  .modal-actions{display:flex;gap:10px;margin-top:20px}
+  .modal-actions .btn{flex:1;text-align:center;padding:12px}
+  .seg-theme{display:inline-flex;background:var(--fill);border-radius:11px;padding:3px;gap:2px;width:100%}
+  .seg-theme button{flex:1;border:none;background:transparent;color:var(--text-2);font-family:var(--font);
+    font-size:14px;font-weight:500;padding:9px;border-radius:9px;cursor:pointer;transition:.25s var(--ease)}
+  .seg-theme button.active{background:var(--card-solid);color:var(--text);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+
+  /* settings tabs */
+  .tabbar{display:flex;gap:2px;background:var(--fill);border-radius:12px;padding:3px;margin-bottom:18px}
+  .tabbar .tab{flex:1;border:none;background:transparent;color:var(--text-2);font-family:var(--font);
+    font-size:13.5px;font-weight:600;padding:9px 6px;border-radius:9px;cursor:pointer;transition:.25s var(--ease)}
+  .tabbar .tab.active{background:var(--card-solid);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+  .tabpane{animation:fade .25s var(--ease)}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  /* Services tab gets more room: the box widens and services lay out in two
+     columns. The width eases between tabs so it doesn't snap. Narrow screens keep
+     the original single-column view. */
+  .settings-modal{transition:max-width .4s var(--ease)}
+  .settings-modal.services-wide{max-width:920px}
+  #serviceGroups.cols{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;align-items:start}
+  #serviceGroups.cols .group{margin-bottom:0}
+  @media (max-width:720px){
+    .settings-modal.services-wide{max-width:560px}
+    #serviceGroups.cols{grid-template-columns:1fr}
+  }
+  /* settings section grouping (declutter) */
+  .set-section{margin-bottom:20px}
+  .set-section:last-child{margin-bottom:0}
+  .set-section > h3{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--text-2);margin:0 0 10px;padding-bottom:7px;border-bottom:.5px solid var(--card-border)}
+  .set-section .field:last-child,.set-section .toggle-line:last-child{margin-bottom:0}
+  /* a nested block that belongs to the toggle above it */
+  .sub-block{padding:12px 14px;background:var(--fill-2);border-radius:12px;margin-top:2px}
+  .sub-block .field:last-child{margin-bottom:0}
+
+  /* ignore-service chips */
+  .chip-group{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:.5px solid var(--card-border);background:var(--fill-2);color:var(--text);
+    font-size:13px;font-weight:500;padding:7px 13px;border-radius:20px;cursor:pointer;text-transform:capitalize;
+    transition:.2s var(--ease)}
+  .chip.on{background:var(--blue);color:#1b1c1d;border-color:var(--blue);font-weight:600}
+  #notifFields{transition:opacity .25s var(--ease)}
+  #notifFields.off{opacity:.4;pointer-events:none}
+
+  /* torrents */
+  .torrents-area{animation:rise .4s var(--ease) both}
+  .tor-list{display:flex;flex-direction:column;gap:10px}
+  .tor{background:var(--card);border:.5px solid var(--card-border);border-radius:var(--radius-sm);
+    padding:14px 16px;box-shadow:var(--shadow);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px)}
+  .tor-name{font-size:14px;font-weight:600;letter-spacing:-.01em;word-break:break-word;margin-bottom:8px}
+  .tor-bar{height:6px;background:var(--fill);border-radius:6px;overflow:hidden;margin-bottom:8px}
+  .tor-bar > span{display:block;height:100%;background:var(--blue);border-radius:6px;transition:width .4s var(--ease)}
+  .tor-bar.done > span{background:var(--green)}
+  .tor-stats{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--text-2)}
+  .tor-stats b{color:var(--text);font-weight:600}
+  .tor-empty{text-align:center;color:var(--text-2);font-size:14px;padding:30px 4px}
+  .tor-notice{background:var(--fill-2);border:.5px solid var(--card-border);border-radius:var(--radius-sm);
+    padding:11px 14px;font-size:13px;color:var(--text-2);margin-bottom:12px}
+  .info-card{background:var(--fill-2);border:.5px solid var(--card-border);border-radius:var(--radius-sm);
+    padding:14px 16px;margin-top:14px}
+  .info-card .info-h{font-size:13px;font-weight:600;margin-bottom:8px}
+  .info-card p{font-size:13px;color:var(--text-2);line-height:1.5;margin-bottom:8px}
+  .info-card b{color:var(--text);font-weight:600}
+
+  .mini-label{display:block;font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:5px}
+  input[type=time]{width:100%;font-family:var(--font);font-size:15px;color:var(--text);
+    background:var(--fill-2);border:.5px solid var(--card-border);border-radius:12px;padding:11px 13px}
+  #soundFields,#quietFields{transition:opacity .25s var(--ease)}
+  .dim{opacity:.4;pointer-events:none}
+
+  /* update notification */
+  .upd-card{position:relative;background:rgba(229,160,13,.07);border:.5px solid rgba(229,160,13,.35);
+    border-radius:var(--radius-sm);padding:16px 18px;margin-bottom:clamp(14px,2.4vw,20px);
+    animation:rise .4s var(--ease) both}
+  .upd-x{position:absolute;top:13px;right:13px;width:26px;height:26px;border-radius:50%;background:var(--fill);
+    border:none;color:var(--text-2);cursor:pointer;display:grid;place-items:center;font-size:13px}
+  .upd-main{display:flex;gap:13px}
+  .upd-icon{width:38px;height:38px;border-radius:10px;background:rgba(229,160,13,.16);display:grid;place-items:center;flex:none}
+  .upd-icon svg{width:20px;height:20px;fill:none;stroke:var(--blue);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .upd-body{flex:1;min-width:0}
+  .upd-head{display:flex;align-items:center;gap:9px;margin-bottom:3px}
+  .upd-title{font-size:15px;font-weight:600}
+  .upd-ver{font-size:11px;font-weight:600;background:rgba(229,160,13,.18);color:var(--blue);padding:2px 8px;border-radius:20px}
+  .upd-sub{font-size:12.5px;color:var(--text-2);margin-bottom:11px}
+  .upd-notes{background:var(--fill-2);border-radius:10px;padding:11px 13px;margin-bottom:13px}
+  .upd-notes .nh{font-size:11px;color:var(--text-2);font-weight:600;letter-spacing:.04em;margin-bottom:7px}
+  .upd-notes ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+  .upd-notes li{font-size:13px;color:var(--text);padding-left:16px;position:relative}
+  .upd-notes li::before{content:"•";color:var(--blue);position:absolute;left:2px}
+  .upd-notes .more{font-size:12.5px;color:var(--text-2);padding-left:16px}
+  .upd-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .upd-actions .btn{padding:8px 14px}
+  .upd-foot{font-size:11.5px;color:var(--text-2);margin-left:auto}
+
+  /* all-clear hero */
+  .allclear{position:relative;overflow:hidden;background:var(--card);border:.5px solid var(--card-border);
+    border-radius:var(--radius);padding:clamp(28px,5vw,40px) 26px clamp(24px,4vw,32px);text-align:center;
+    box-shadow:var(--shadow);margin-bottom:clamp(14px,2.4vw,20px);
+    backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+    animation:rise .5s var(--ease) both}
+  .ac-glow{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(420px 200px at 50% -10%, rgba(59,184,90,.10), transparent 70%)}
+  .ac-inner{position:relative}
+  .ac-badge{width:80px;height:80px;margin:0 auto 16px;position:relative}
+  .ac-badge::before{content:"";position:absolute;inset:0;border-radius:50%;background:rgba(59,184,90,.12)}
+  .ac-badge::after{content:"";position:absolute;inset:9px;border-radius:50%;background:rgba(59,184,90,.16)}
+  .ac-badge svg{position:absolute;inset:0;margin:auto;z-index:2}
+  .ac-check{position:absolute;right:0;bottom:0;width:28px;height:28px;border-radius:50%;background:var(--green);
+    display:grid;place-items:center;border:3px solid var(--card-solid);z-index:3;
+    animation:pop .45s var(--ease) both;animation-delay:.15s}
+  @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+  .ac-title{font-size:clamp(20px,5vw,22px);font-weight:600;letter-spacing:-.02em;margin-bottom:4px}
+  .ac-sub{font-size:clamp(13px,3.4vw,14px);color:var(--text-2)}
+
+  /* stats panel (shared inline + modal) */
+  .stats-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:12px}
+  .sm-card{background:var(--fill-2);border-radius:var(--radius-sm);padding:13px 14px}
+  .sm-label{font-size:12px;color:var(--text-2);margin-bottom:4px}
+  .sm-val{font-size:clamp(20px,4.5vw,23px);font-weight:600}
+  .sm-val.good{color:var(--green)}
+  .stats-row{display:grid;grid-template-columns:1.35fr 1fr;gap:12px;margin-bottom:12px}
+  @media(max-width:560px){.stats-row{grid-template-columns:1fr}}
+  .stats-box{background:var(--fill-2);border-radius:var(--radius-sm);padding:15px 16px}
+  .stats-box h4{font-size:13px;font-weight:600;margin-bottom:12px}
+  .np-pill{font-size:11px;background:rgba(59,184,90,.15);color:var(--badge-ok);padding:3px 9px;border-radius:20px}
+  .np-src{display:inline-block;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.03em;
+    color:var(--text-2);background:var(--fill-2);padding:1px 7px;border-radius:10px;margin-left:7px;vertical-align:1px}
+  .np-breakdown{font-size:11.5px;color:var(--text-2);margin:-2px 0 10px}
+  .beta-note{font-size:12px;line-height:1.45;color:var(--text);background:rgba(229,160,13,.10);
+    border:.5px solid rgba(229,160,13,.35);border-radius:10px;padding:9px 12px;margin-bottom:12px}
+  .lib-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:.5px solid var(--card-border)}
+  .lib-row:first-of-type{border-top:none}
+  .lib-srv{font-weight:600;font-size:13.5px}
+  .lib-nums{font-size:12px;color:var(--text-2)}
+  .np-row{display:flex;gap:11px;margin-bottom:11px}
+  .np-row:last-child{margin-bottom:0}
+  .np-thumb{width:36px;height:54px;border-radius:6px;background:linear-gradient(160deg,#3a3d42,#26282b);
+    flex:none;display:grid;place-items:center;color:#6e7176;position:relative;overflow:hidden}
+  .np-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .3s ease}
+  .np-meta{flex:1;min-width:0}
+  .np-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .np-sub{font-size:11.5px;color:var(--text-2);margin:1px 0 6px}
+  .np-bar{height:5px;background:var(--fill);border-radius:5px;overflow:hidden}
+  .np-bar>span{display:block;height:100%;background:var(--blue)}
+  .drive{margin-bottom:13px} .drive:last-child{margin-bottom:0}
+  .drive-h{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+  .drive-h .dn{color:var(--text)} .drive-h .dv{color:var(--text-2)}
+  .drive-bar{height:7px;background:var(--fill);border-radius:7px;overflow:hidden}
+  .drive-bar>span{display:block;height:100%;border-radius:7px}
+  .stats-empty{color:var(--text-2);font-size:13px;text-align:center;padding:8px 0}
+
+  /* animated status transitions */
+  .badge,.card{transition:background-color .5s var(--ease),color .5s var(--ease),box-shadow .5s var(--ease),border-color .5s var(--ease)}
+  .badge .d{transition:background-color .5s var(--ease)}
+  @keyframes badgepulse{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+  .badge.changed{animation:badgepulse .5s var(--ease)}
+
+
+  /* history */
+  .hist-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:12px;margin-bottom:20px}
+  .hist-card{background:var(--fill-2);border:.5px solid var(--card-border);border-radius:var(--radius-sm);padding:14px}
+  .hist-card .hc-name{font-size:14px;font-weight:600;text-transform:capitalize;margin-bottom:8px}
+  .hist-card .hc-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text-2);padding:2px 0}
+  .hist-card .hc-row b{color:var(--text)}
+  /* inline 30-day uptime: label+% on one line, thin bar underneath (no extra footprint) */
+  .hc-up{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;color:var(--text-2);margin-bottom:4px}
+  .hc-up b{font-size:13px;color:var(--text)}
+  .hc-upbar{height:4px;background:var(--fill);border-radius:4px;overflow:hidden;margin-bottom:9px}
+  .hc-upbar>span{display:block;height:100%;border-radius:4px}
+  /* expandable recent-events list */
+  .hist-more{display:none}
+  .hist-more.show{display:block}
+  .hist-more-btn{margin-top:10px;border:none;background:none;cursor:pointer;font-family:var(--font);
+    font-size:13px;font-weight:600;color:var(--blue);padding:2px 0}
+  .hist-h{font-size:13px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;margin:6px 0 10px}
+  .hist-ev{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:.5px solid var(--hairline)}
+  .hist-ev:last-child{border-bottom:none}
+  .hist-ev .he-dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex:none}
+  .hist-ev .he-dot.down{background:var(--red)} .hist-ev .he-dot.recover{background:var(--green)}
+  .hist-ev .he-body{flex:1;min-width:0}
+  .hist-ev .he-line{font-size:13.5px} .hist-ev .he-line b{text-transform:capitalize}
+  .hist-ev .he-time{font-size:12px;color:var(--text-2);margin-top:1px}
+
+  /* skeleton loading */
+  .skel{background:var(--card);border:.5px solid var(--card-border);border-radius:var(--radius);
+    padding:clamp(18px,4vw,24px);box-shadow:var(--shadow);overflow:hidden}
+  .skel-line{height:14px;border-radius:7px;background:var(--fill);margin-bottom:10px;
+    background-image:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);
+    background-size:200% 100%;animation:shimmer 1.4s infinite}
+  .skel-line.t{width:45%;height:18px} .skel-line.s{width:70%} .skel-line.b{width:30%;margin-bottom:0}
+  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+  /* flash on new error */
+  @keyframes errflash{0%,100%{box-shadow:var(--shadow)}30%{box-shadow:var(--shadow),0 0 0 3px var(--red)}}
+  .flash{animation:errflash 1s ease 2}
+
+  .info-btn{display:inline-grid;place-items:center;width:18px;height:18px;padding:0;margin-left:4px;
+    border:none;background:transparent;color:var(--text-2);font-size:15px;line-height:1;cursor:pointer;
+    vertical-align:-2px;border-radius:50%;transition:color .2s}
+  .info-btn:hover{color:var(--blue)}
+  .beta-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--blue);background:rgba(229,160,13,.16);padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:1px}
+  .help-body p{font-size:14px;color:var(--text);line-height:1.55;margin:0 0 14px}
+  .help-body ol{margin:0 0 14px;padding-left:20px;display:flex;flex-direction:column;gap:9px}
+  .help-body li{font-size:14px;color:var(--text);line-height:1.5}
+  .help-body ul{margin:0 0 14px;padding-left:20px;display:flex;flex-direction:column;gap:9px}
+  .help-body code{background:var(--fill);padding:2px 6px;border-radius:6px;font-size:12.5px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  /* restricted public view hides the "manage services" footer hint */
+  html.public .monitor-area footer{display:none}
+  .help-body .help-note{font-size:13px;color:var(--text-2);background:var(--fill-2);padding:11px 13px;border-radius:10px;margin:0}
+
+  .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(80px);
+    background:var(--card-solid);border:.5px solid var(--card-border);color:var(--text);
+    padding:13px 22px;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.3);font-size:14px;font-weight:500;
+    z-index:80;opacity:0;transition:transform .4s var(--ease),opacity .4s var(--ease);max-width:90vw}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title">
+      <div class="glyph">
+        <svg viewBox="0 0 24 24" aria-label="GuardTowarr">
+          <!-- watchtower: roof, body, base -->
+          <path class="tw-roof" d="M12 3.2 16.2 7.2H7.8L12 3.2Z"/>
+          <path class="tw-body" d="M9 8h6l-.5 11h-5L9 8Z"/>
+          <rect class="tw-base" x="7.6" y="18.4" width="8.8" height="2.2" rx="0.6"/>
+          <line class="tw-watch" x1="12" y1="11" x2="12" y2="14.5"/>
+        </svg>
+      </div>
+      <div>
+        <h1>GuardTowarr</h1>
+        <div class="sub">Updated <span id="lastpoll">—</span></div>
+      </div>
+    </div>
+    <div class="hdr-actions">
+      <button class="icon-btn" id="torrentToggle" title="Active torrents" onclick="toggleTorrents()">
+        <svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><line x1="5" y1="20" x2="19" y2="20"/></svg>
+      </button>
+      <button class="icon-btn" id="searchToggle" title="Search to add media" onclick="toggleSearch()">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+      </button>
+      <button class="icon-btn" id="refreshBtn" title="Refresh now" onclick="manualRefresh()">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.5 15a9 9 0 1 1-2-9.5L23 10"/></svg>
+      </button>
+      <button class="icon-btn" id="statsBtn" title="Stats" onclick="openStats()" style="display:none">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="20" x2="5" y2="12"/><line x1="12" y1="20" x2="12" y2="5"/><line x1="19" y1="20" x2="19" y2="14"/></svg>
+      </button>
+      <button class="icon-btn" id="historyBtn" title="History & uptime" onclick="openHistory()">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+      </button>
+      <button class="icon-btn" id="settingsBtn" title="Settings" onclick="openSettings()">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- slide-in search -->
+  <div class="searchbar" id="searchbar">
+    <div class="search-inner">
+      <svg class="mag" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+      <input id="searchInput" type="text" placeholder="Search movies or shows to add…" autocomplete="off">
+      <div class="kind-seg">
+        <button id="kindMovie" class="active" onclick="setKind('movie')" data-kind="movie">Movie</button>
+        <button id="kindSeries" onclick="setKind('series')" data-kind="series">Show</button>
+        <button id="kindBook" onclick="setKind('book')" data-kind="book" style="display:none">Book</button>
+        <button id="kindMusic" onclick="setKind('music')" data-kind="music" style="display:none">Music</button>
+      </div>
+      <button class="search-close" onclick="toggleSearch()">✕</button>
+    </div>
+  </div>
+
+  <!-- search results live here -->
+  <div id="searchResults"></div>
+
+  <!-- torrents panel -->
+  <div class="torrents-area" id="torrentsArea" style="display:none">
+    <div class="toolbar">
+      <div class="seg">
+        <button id="torDownloading" class="active" onclick="setTorrentTab('downloading')">Downloading</button>
+        <button id="torSeeding" onclick="setTorrentTab('seeding')">Seeding</button>
+      </div>
+      <div class="spacer"></div>
+      <button class="icon-btn" title="About this view" onclick="openHelp('torrents_view')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      </button>
+      <button class="icon-btn" title="Refresh torrents" onclick="loadTorrents()">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.5 15a9 9 0 1 1-2-9.5L23 10"/></svg>
+      </button>
+      <button class="search-close" onclick="toggleTorrents()">✕</button>
+    </div>
+    <div id="torrentsList"></div>
+  </div>
+
+  <!-- monitor area (hidden during search) -->
+  <div class="monitor-area" id="monitorArea">
+    <div class="upd-card" id="updCard" style="display:none">
+      <button class="upd-x" id="updX" onclick="dismissUpdate()" title="Dismiss" aria-label="Dismiss">✕</button>
+      <div class="upd-main">
+        <div class="upd-icon"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><line x1="5" y1="20" x2="19" y2="20"/></svg></div>
+        <div class="upd-body">
+          <div class="upd-head"><span class="upd-title">Update available</span><span class="upd-ver" id="updVer">v1.4.0</span></div>
+          <div class="upd-sub" id="updSub">You're on v1.3.0</div>
+          <div class="upd-notes" id="updNotes"></div>
+          <div class="upd-actions">
+            <a class="btn tint" id="updLink" href="#" target="_blank" rel="noopener">View on GitHub ↗</a>
+            <button class="btn" onclick="dismissUpdate()">Dismiss</button>
+            <span class="upd-foot">Won't ask again for a week</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- compact hero shown when there ARE issues -->
+    <div class="hero" id="hero" style="display:none">
+      <div class="hero-icon ok" id="heroIcon">✓</div>
+      <div class="hero-text">
+        <div class="l1" id="heroL1">All systems healthy</div>
+        <div class="l2" id="heroL2"></div>
+      </div>
+    </div>
+    <!-- full all-clear hero shown when everything is healthy -->
+    <div class="allclear" id="allClear" style="display:none">
+      <div class="ac-glow"></div>
+      <div class="ac-inner">
+        <div class="ac-badge">
+          <svg viewBox="0 0 24 24" width="36" height="36">
+            <path d="M12 3.2 16.2 7.2H7.8L12 3.2Z" fill="none" stroke="#3bb85a" stroke-width="1.4" stroke-linejoin="round"/>
+            <path d="M9 8h6l-.5 11h-5L9 8Z" fill="none" stroke="#3bb85a" stroke-width="1.4" stroke-linejoin="round"/>
+            <rect x="7.6" y="18.4" width="8.8" height="2.2" rx="0.6" fill="none" stroke="#3bb85a" stroke-width="1.4"/>
+            <line x1="12" y1="10.5" x2="12" y2="14.5" stroke="#3bb85a" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <span class="ac-check"><svg viewBox="0 0 24 24" width="15" height="15"><polyline points="5 12 10 17 19 7" fill="none" stroke="#10210f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+        <div class="ac-title">All systems operational</div>
+        <div class="ac-sub" id="acSub">All services healthy</div>
+      </div>
+    </div>
+    <!-- inline stats (shown under the all-clear hero when healthy) -->
+    <div id="inlineStats" style="display:none"></div>
+
+    <div class="toolbar" id="mainToolbar">
+      <div class="seg">
+        <button id="segActive" class="active" onclick="setView('active')">Active</button>
+        <button id="segDismissed" onclick="setView('dismissed')">Dismissed</button>
+      </div>
+      <div class="spacer"></div>
+      <button id="restoreAllBtn" class="btn" onclick="restoreAll()" style="display:none">Restore all</button>
+    </div>
+    <div id="grid" class="grid"></div>
+    <footer>Dismissed issues stay hidden until restored. Tap the gear to manage services, credentials & theme.</footer>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="settingsOverlay">
+  <div class="modal settings-modal">
+    <div class="mhead">
+      <div><h2>Settings</h2><div class="msub">Refresh, services, notifications & more</div></div>
+      <button class="search-close" onclick="closeSettings()">✕</button>
+    </div>
+
+    <div class="tabbar">
+      <button class="tab active" data-tab="general" onclick="setSettingsTab('general')">General</button>
+      <button class="tab" data-tab="services" onclick="setSettingsTab('services')">Services</button>
+      <button class="tab" data-tab="notifications" onclick="setSettingsTab('notifications')">Alerts</button>
+      <button class="tab" data-tab="beta" onclick="setSettingsTab('beta')">Stability</button>
+    </div>
+
+    <!-- GENERAL -->
+    <div class="tabpane active-pane" data-pane="general">
+      <div class="set-section">
+        <h3>Appearance</h3>
+        <div class="field" style="margin-bottom:0">
+          <div class="seg-theme" id="themeSeg">
+            <button data-theme="auto" onclick="setTheme('auto')">Auto</button>
+            <button data-theme="light" onclick="setTheme('light')">Light</button>
+            <button data-theme="dark" onclick="setTheme('dark')">Dark</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="set-section">
+        <h3>Dashboard</h3>
+        <div class="field">
+          <label>Refresh interval (seconds)</label>
+          <input id="intervalInput" type="number" min="5" step="5" value="30">
+        </div>
+        <div class="field">
+          <label>Port</label>
+          <input id="portInput" type="number" min="1" max="65535" step="1" value="9595">
+          <div class="tl-sub" style="margin-top:5px;font-size:11px;line-height:1.4;opacity:.8">Default 9595. Changing this needs a restart. (Ignored in Docker; set the port in your compose file.)</div>
+        </div>
+      </div>
+
+      <div class="set-section">
+        <h3>Notices</h3>
+        <div class="toggle-line">
+          <div><div class="tl-text">Check for updates</div><div class="tl-sub">Once a day, show a dismissible notice when a new release is out</div></div>
+          <label class="switch"><input type="checkbox" id="uiUpdateCheck"><span class="track"></span></label>
+        </div>
+        <div class="toggle-line">
+          <div><div class="tl-text">Sound &amp; flash on new error</div><div class="tl-sub">Gentle cue when something newly breaks</div></div>
+          <label class="switch"><input type="checkbox" id="uiSound"><span class="track"></span></label>
+        </div>
+        <div id="soundFields" class="sub-block">
+          <div class="field">
+            <label>Custom sound URL (optional)</label>
+            <input id="uiSoundUrl" type="text" placeholder="https://… (blank = built-in beep)">
+          </div>
+          <div class="row2">
+            <button class="btn" style="flex:1" onclick="document.getElementById('soundFile').click()">Choose local file…</button>
+            <button class="btn" style="flex:1" onclick="previewSound()">Preview</button>
+          </div>
+          <input id="soundFile" type="file" accept="audio/*" style="display:none" onchange="onSoundFilePicked(event)">
+          <div class="tl-sub" id="soundFileNote" style="margin-top:6px">A local file plays this session; a URL is remembered across restarts.</div>
+        </div>
+      </div>
+
+      <div class="set-section">
+        <h3>Remote access (advanced)</h3>
+        <div class="toggle-line">
+          <div><div class="tl-text">Public endpoint <button class="info-btn" onclick="openHelp('public')" aria-label="About remote access">ⓘ</button></div><div class="tl-sub">A separate, restricted port for monitoring from outside your network</div></div>
+          <label class="switch"><input type="checkbox" id="pubEnabled"><span class="track"></span></label>
+        </div>
+        <div id="pubFields" class="sub-block">
+          <div class="field">
+            <label>Port</label>
+            <input id="pubPort" type="number" min="1" max="65535" step="1" value="9596">
+          </div>
+          <div class="field">
+            <label>Access token (shared secret)</label>
+            <div style="display:flex;gap:8px">
+              <input id="pubToken" type="text" placeholder="A long random secret" style="flex:1">
+              <button class="btn" onclick="genPubToken()">Generate</button>
+            </div>
+          </div>
+          <div class="toggle-line">
+            <div><div class="tl-text">Allow content requests</div><div class="tl-sub">Let token-holders search and add media remotely</div></div>
+            <label class="switch"><input type="checkbox" id="pubAllowRequests"><span class="track"></span></label>
+          </div>
+          <div class="toggle-line">
+            <div><div class="tl-text">Allow remediation actions</div><div class="tl-sub">Let token-holders run fixes remotely, <b>including destructive ones</b> (remove + blocklist)</div></div>
+            <label class="switch"><input type="checkbox" id="pubAllowActions"><span class="track"></span></label>
+          </div>
+          <div class="beta-note">This port has no login or HTTPS of its own. Put it behind an HTTPS reverse proxy, ideally with its own auth (Authelia, Authentik, Caddy/NPM basic auth). Never forward the raw port to the internet. Takes effect after a restart.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVICES -->
+    <div class="tabpane" data-pane="services" style="display:none">
+      <div id="serviceGroups"></div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="tabpane" data-pane="notifications" style="display:none">
+      <div class="toggle-line">
+        <div><div class="tl-text">Enable notifications <button class="info-btn" onclick="openNotifHelp()" title="How notifications work" aria-label="How notifications work">ⓘ</button></div><div class="tl-sub">Master switch for all alert delivery</div></div>
+        <label class="switch"><input type="checkbox" id="notifEnabled"><span class="track"></span></label>
+      </div>
+      <div id="notifFields">
+
+        <div class="set-section">
+          <h3>Delivery</h3>
+          <div class="toggle-line">
+            <div><div class="tl-text">ntfy (phone push)</div><div class="tl-sub">Free push notifications, no account needed</div></div>
+            <label class="switch"><input type="checkbox" id="ntfyEnabled"><span class="track"></span></label>
+          </div>
+          <div id="ntfyFields" class="sub-block">
+            <div class="field">
+              <label>ntfy server</label>
+              <input id="notifServer" type="text" placeholder="https://ntfy.sh">
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Topic (your private channel name)</label>
+              <input id="notifTopic" type="text" placeholder="e.g. guardtowarr-7h2k9">
+            </div>
+          </div>
+          <div class="toggle-line" style="margin-top:6px">
+            <div><div class="tl-text">Discord</div><div class="tl-sub">Post alerts to a channel via webhook</div></div>
+            <label class="switch"><input type="checkbox" id="discordEnabled"><span class="track"></span></label>
+          </div>
+          <div id="discordFields" class="sub-block">
+            <div class="field" style="margin-bottom:0">
+              <label>Webhook URL</label>
+              <input id="discordWebhook" type="text" placeholder="https://discord.com/api/webhooks/…">
+              <div class="tl-sub" style="margin-top:6px">In Discord: Channel settings → Integrations → Webhooks → New Webhook → Copy URL.</div>
+            </div>
+          </div>
+          <div class="toggle-line" style="margin-top:6px">
+            <div><div class="tl-text">Pushover</div><div class="tl-sub">Push alerts to the Pushover app</div></div>
+            <label class="switch"><input type="checkbox" id="pushoverEnabled"><span class="track"></span></label>
+          </div>
+          <div id="pushoverFields" class="sub-block">
+            <div class="field">
+              <label>Application token</label>
+              <input id="pushoverToken" type="text" placeholder="Your Pushover app API token">
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>User key</label>
+              <input id="pushoverUser" type="text" placeholder="Your Pushover user (or group) key">
+              <div class="tl-sub" style="margin-top:6px">Register a free application at <b>pushover.net</b> for the token, and find your user key on your Pushover dashboard.</div>
+              <div class="beta-note" style="margin-top:8px">If you use Pushover's built-in quiet hours / after-hours mode, turn <b>off</b> GuardTowarr's own Quiet hours below to avoid both holding alerts and getting a doubled-up experience.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="set-section">
+          <h3>What &amp; when</h3>
+          <div class="field">
+            <label>Notify me about</label>
+            <div class="seg-theme" id="notifSeverity">
+              <button data-sev="error" onclick="setNotifSeverity('error')">Errors only</button>
+              <button data-sev="warning" onclick="setNotifSeverity('warning')">Warnings &amp; errors</button>
+            </div>
+          </div>
+          <div class="toggle-line">
+            <div><div class="tl-text">Notify on recovery</div><div class="tl-sub">When a service becomes healthy again</div></div>
+            <label class="switch"><input type="checkbox" id="notifRecovery"><span class="track"></span></label>
+          </div>
+          <div class="toggle-line">
+            <div><div class="tl-text">Torrent finished alerts <span class="beta-tag">beta</span> <button class="info-btn" onclick="openHelp('torrent_done')" aria-label="About torrent alerts">ⓘ</button></div><div class="tl-sub">Notify when a download completes</div></div>
+            <label class="switch"><input type="checkbox" id="notifTorrentDone"><span class="track"></span></label>
+          </div>
+          <div class="toggle-line">
+            <div><div class="tl-text">Quiet hours <button class="info-btn" onclick="openHelp('quiet')" aria-label="About quiet hours">ⓘ</button></div><div class="tl-sub">Hold alerts overnight, then send one summary</div></div>
+            <label class="switch"><input type="checkbox" id="quietEnabled"><span class="track"></span></label>
+          </div>
+          <div class="row2" id="quietFields">
+            <div style="flex:1"><label class="mini-label">From</label><input id="quietStart" type="time" value="23:00"></div>
+            <div style="flex:1"><label class="mini-label">Until</label><input id="quietEnd" type="time" value="07:00"></div>
+          </div>
+          <div class="field" style="margin-top:14px">
+            <label>Ignore these services</label>
+            <div id="notifIgnore" class="chip-group"></div>
+          </div>
+        </div>
+
+        <button class="btn" style="width:100%" onclick="testNotify()">Send test notification</button>
+      </div>
+    </div>
+
+    <!-- STABILITY -->
+    <div class="tabpane" data-pane="beta" style="display:none">
+      <div class="toggle-line" style="margin-top:2px">
+        <div><div class="tl-text">Diagnose &amp; fix <button class="info-btn" onclick="openHelp('remediation')" aria-label="About diagnose and fix">ⓘ</button></div><div class="tl-sub">Deeper Radarr/Sonarr download checks, plus one-click fixes on issues</div></div>
+        <label class="switch"><input type="checkbox" id="betaRemediation"><span class="track"></span></label>
+      </div>
+      <div class="beta-note">Turning it off does more than hide the buttons; it also <b>stops the deeper queue checks, so stuck downloads are no longer detected or shown</b> (and the extra polling stops). Your core service up/down monitoring and alerts are unaffected either way.</div>
+      <div class="toggle-line" style="margin-top:14px">
+        <div><div class="tl-text">Lite stats mode <button class="info-btn" onclick="openHelp('lite_stats')" aria-label="About lite stats mode">ⓘ</button></div><div class="tl-sub">Lighten the stats panel to ease load on low-power servers</div></div>
+        <label class="switch"><input type="checkbox" id="betaLiteStats"><span class="track"></span></label>
+      </div>
+      <div class="beta-note">Skips the heavier library, now-playing and storage lookups, showing just uptime and recent activity instead. <b>Monitoring, warnings, errors and notifications are unaffected.</b></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" onclick="closeSettings()">Cancel</button>
+      <button class="btn tint" onclick="saveSettings()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING MODAL -->
+<div class="overlay" id="onboardOverlay">
+  <div class="modal" style="max-width:600px">
+    <div class="mhead">
+      <div><h2 id="onboardTitle">Welcome to GuardTowarr</h2><div class="msub" id="onboardSub">Pick the services you want to monitor</div></div>
+    </div>
+
+    <!-- STEP 1: pick services -->
+    <div id="onboardStep1">
+      <div class="pick-grid" id="pickGrid"></div>
+      <div class="modal-actions">
+        <button class="btn" onclick="skipOnboard()">Skip for now</button>
+        <button class="btn tint" onclick="onboardToStep2()">Continue</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: enter credentials for picked services -->
+    <div id="onboardStep2" style="display:none">
+      <div id="onboardBody"></div>
+      <div class="modal-actions">
+        <button class="btn" onclick="onboardBackToStep1()">Back</button>
+        <button class="btn tint" onclick="saveOnboard()">Finish setup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM ADD MODAL -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal" style="max-width:440px">
+    <div class="mhead">
+      <div><h2 id="confirmTitle">Add this?</h2><div class="msub" id="confirmSub"></div></div>
+      <button class="search-close" onclick="closeConfirm()">✕</button>
+    </div>
+    <div class="field">
+      <label>Quality profile</label>
+      <select id="profileSelect"></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeConfirm()">Cancel</button>
+      <button class="btn tint" id="confirmAddBtn" onclick="confirmAdd()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="overlay" id="historyOverlay">
+  <div class="modal" style="max-width:600px">
+    <div class="mhead">
+      <div><h2>History &amp; uptime</h2><div class="msub">Outages over the last 30 days</div></div>
+      <button class="search-close" onclick="closeHistory()">✕</button>
+    </div>
+    <div id="historyBody"><div class="tor-empty">Loading…</div></div>
+  </div>
+</div>
+
+<div class="overlay" id="statsOverlay">
+  <div class="modal" style="max-width:640px">
+    <div class="mhead">
+      <div><h2>Stats</h2><div class="msub">Live overview of your stack</div></div>
+      <button class="search-close" onclick="closeStats()">✕</button>
+    </div>
+    <div id="statsModalBody"><div class="tor-empty">Loading…</div></div>
+  </div>
+</div>
+
+<div class="overlay" id="helpOverlay">
+  <div class="modal" style="max-width:520px">
+    <div class="mhead">
+      <div><h2 id="helpTitle">Help</h2><div class="msub" id="helpSub"></div></div>
+      <button class="search-close" onclick="closeHelp()">✕</button>
+    </div>
+    <div class="help-body" id="helpBody"></div>
+  </div>
+</div>
+
+<!-- PUBLIC LOGIN GATE (shown only on the restricted public endpoint) -->
+<div class="overlay" id="publicLoginOverlay">
+  <div class="modal" style="max-width:420px">
+    <div class="mhead"><div><h2>Remote access</h2><div class="msub">Enter your access token to continue</div></div></div>
+    <div class="field" style="margin-bottom:10px">
+      <label>Access token</label>
+      <input id="publicTokenInput" type="password" placeholder="Token" autocomplete="off"
+             onkeydown="if(event.key==='Enter')unlockPublic()">
+    </div>
+    <div id="publicLoginErr" style="display:none;color:var(--badge-err);font-size:13px;margin-bottom:10px"></div>
+    <div class="modal-actions"><button class="btn tint" style="flex:1" onclick="unlockPublic()">Unlock</button></div>
+  </div>
+</div>
+
+<!-- DISCLAIMER shown when enabling the public endpoint from settings -->
+<div class="overlay" id="pubDisclaimerOverlay">
+  <div class="modal" style="max-width:540px">
+    <div class="mhead"><div><h2>Before you enable remote access</h2><div class="msub">Please read this carefully</div></div></div>
+    <div class="help-body">
+      <p>This opens a <b>second port</b> meant to be reached from outside your network. It serves a locked-down view: live service status and (optionally) content requests. It <b>never</b> exposes your API keys, passwords, or internal addresses.</p>
+      <ul>
+        <li>It is protected only by the <b>access token</b> you set. That token is a shared secret, so anyone who has it can use the endpoint.</li>
+        <li>The token is sent with each request, so on plain HTTP it could be intercepted. You should <b>serve it over HTTPS</b>.</li>
+        <li><b>Strongly recommended:</b> put this port behind a reverse proxy that adds its own login and HTTPS, such as Authelia, Authentik, Cloudflare Access, or Caddy/Nginx (NPM) basic auth. Do not forward the raw port straight to the internet.</li>
+        <li>Use a long, random token (the <b>Generate</b> button makes one), and leave <b>Allow content requests</b> off unless you need it.</li>
+      </ul>
+      <p class="help-note">The public port only starts after you save and restart GuardTowarr.</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="cancelPublicDisclaimer()">Cancel</button>
+      <button class="btn tint" onclick="acceptPublicDisclaimer()">I understand, enable it</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const FIELD_LABELS = {url:"Server URL", api_key:"API Key", token:"Plex Token", username:"Username", password:"Password"};
+
+/* ---------- restricted public mode ----------
+   The server injects window.GT_PUBLIC on the public port. In that mode every
+   /api request carries the access token, the page shows a token gate, and the
+   admin UI (settings/services/torrents) is hidden. None of this runs on the
+   normal private port. */
+const GT_PUBLIC = !!window.GT_PUBLIC;
+const GT_ALLOW_REQUESTS = !!window.GT_ALLOW_REQUESTS;
+let publicToken = GT_PUBLIC ? (localStorage.getItem("gt_public_token") || "") : "";
+if (GT_PUBLIC) {
+  const _fetch = window.fetch.bind(window);
+  window.fetch = (url, opts) => {
+    opts = opts || {};
+    if (typeof url === "string" && url.indexOf("/api/") === 0 && publicToken) {
+      opts = Object.assign({}, opts);
+      opts.headers = Object.assign({}, opts.headers || {}, {"X-GT-Token": publicToken});
+    }
+    return _fetch(url, opts);
+  };
+}
+
+let prevAlertCount = 0, notifyReady = false;
+let dismissedMap = {}, view = "active", servicesCache = [], serviceMeta = {}, onboarding = [];
+let setupComplete = true, serviceCatalog = [];
+let searchKinds = ["movie","series"];
+let fullConfig = null;       // loaded for settings
+let theme = "auto";
+let searchOpen = false, searchKind = "movie", searchTimer = null;
+let uiConfig = {sound_enabled:false, sound_url:""};
+let lastPollTs = null;       // for relative "x min ago"
+let firstLoad = true;
+let localSoundData = null;   // session-only data URL from a picked file
+let prevErrorServices = new Set();  // for flash/sound on NEW error
+let issueActionsMap = {};    // issue id -> its remediation action descriptors (from /api/status)
+
+if ("Notification" in window && Notification.permission === "default") {
+  Notification.requestPermission().then(p => notifyReady = (p === "granted"));
+} else if ("Notification" in window) { notifyReady = Notification.permission === "granted"; }
+
+function rank(l){ return l==="error"?2:l==="warning"?1:0 }
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function lvlClass(l){ return l==="error"?"err":l==="warning"?"warn":"ok" }
+function applyTheme(t){ document.documentElement.setAttribute("data-theme", t); theme=t; }
+
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2600); }
+
+function relTime(ts){
+  if(!ts) return "—";
+  const s=Math.max(0,Math.floor((Date.now()-ts)/1000));
+  if(s<10) return "just now";
+  if(s<60) return s+"s ago";
+  const m=Math.floor(s/60); if(m<60) return m+" min ago";
+  const h=Math.floor(m/60); if(h<24) return h+"h ago";
+  return Math.floor(h/24)+"d ago";
+}
+function tickRelTime(){
+  const el=document.getElementById("lastpoll");
+  if(el && lastPollTs) el.textContent = relTime(lastPollTs);
+}
+setInterval(tickRelTime, 10000);
+
+function settingsOpen(){
+  return document.getElementById("settingsOverlay").classList.contains("show")
+      || document.getElementById("onboardOverlay").classList.contains("show")
+      || document.getElementById("historyOverlay").classList.contains("show");
+}
+
+function showSkeletons(){
+  const grid=document.getElementById("grid");
+  grid.innerHTML = Array.from({length:6}).map(()=>`
+    <div class="skel"><div class="skel-line t"></div><div class="skel-line s"></div>
+      <div class="skel-line b"></div></div>`).join("");
+}
+
+/* ---------- public-mode UI (token gate + hiding admin bits) ---------- */
+function applyPublicMode(){
+  if(!GT_PUBLIC) return;
+  document.documentElement.classList.add("public");
+  // hide admin/owner-only controls; keep monitoring (status, stats, torrents) and
+  // search when requests are allowed
+  ["settingsBtn"].forEach(id=>{ const e=document.getElementById(id); if(e) e.style.display="none"; });
+  if(!GT_ALLOW_REQUESTS){ const e=document.getElementById("searchToggle"); if(e) e.style.display="none"; }
+}
+function showPublicLogin(msg){
+  const o=document.getElementById("publicLoginOverlay"); o.classList.add("show");
+  const err=document.getElementById("publicLoginErr");
+  if(msg){ err.textContent=msg; err.style.display="block"; } else { err.style.display="none"; }
+  setTimeout(()=>{ const i=document.getElementById("publicTokenInput"); if(i) i.focus(); },200);
+}
+function unlockPublic(){
+  const v=(document.getElementById("publicTokenInput").value||"").trim();
+  if(!v) return;
+  publicToken=v; localStorage.setItem("gt_public_token", v);
+  fetch("/api/status").then(r=>{
+    if(r.status===401){
+      publicToken=""; localStorage.removeItem("gt_public_token");
+      showPublicLogin("That token didn't work. Try again."); return;
+    }
+    document.getElementById("publicLoginOverlay").classList.remove("show");
+    refresh();
+  }).catch(()=>showPublicLogin("Couldn't reach the server."));
+}
+
+async function refresh(){
+  // Don't disturb the UI while the user is editing settings/onboarding fields.
+  if(settingsOpen()) return;
+  try{
+    const resp = await fetch("/api/status");
+    if(GT_PUBLIC && resp.status===401){ showPublicLogin(); return; }  // need a (valid) token
+    const data = await resp.json();
+    lastPollTs = data.last_poll ? Date.parse(data.last_poll.replace(" ","T")) : null;
+    const lpEl=document.getElementById("lastpoll");
+    lpEl.textContent = relTime(lastPollTs);
+    dismissedMap = data.dismissed || {};
+    servicesCache = Object.values(data.services || {});
+    serviceMeta = data.service_meta || {};
+    onboarding = data.onboarding || [];
+    setupComplete = data.setup_complete !== false;
+    serviceCatalog = data.service_catalog || [];
+    searchKinds = data.search_kinds || ["movie","series"];
+    syncSearchKinds();
+    uiConfig = data.ui || uiConfig;
+    if(data.theme && data.theme!==theme) applyTheme(data.theme);
+    firstLoad = false;
+    paint();
+    maybeOnboard();
+  }catch(e){ document.getElementById("lastpoll").textContent = "offline"; }
+}
+
+function visibleServices(){
+  // hide services flagged hidden or disabled from the dashboard
+  return servicesCache.filter(s=>{
+    const m = serviceMeta[s.name] || {};
+    return !m.hidden && !m.disabled;
+  });
+}
+
+function setView(v){ view=v;
+  document.getElementById("segActive").classList.toggle("active",v==="active");
+  document.getElementById("segDismissed").classList.toggle("active",v==="dismissed");
+  paint(); }
+
+/* Track rendered cards so we only update what changed (no full reload/flicker) */
+let cardState = {};      // key -> { sig, el }
+let lastViewKey = "";    // detect view switches (active<->dismissed) to force rebuild
+
+function buildCard(s, meta, showDismissed){
+  const all = s.errors||[];
+  const issues = all.filter(e=>showDismissed?dismissedMap[e.id]:!dismissedMap[e.id]);
+  const active = all.filter(e=>!dismissedMap[e.id]);
+  let dl=s.level; if(s.level!=="ok"&&active.length===0) dl="ok";
+  const lc=lvlClass(dl);
+
+  let issuesHtml="";
+  if(issues.length){
+    issuesHtml='<div class="hr"></div><div class="issues">'+issues.map(e=>{
+      const isD=!!dismissedMap[e.id];
+      const act=isD?`<button class="link-btn" onclick="restore('${e.id}')">Restore</button>`
+                   :`<button class="link-btn" onclick="dismiss('${e.id}')">Dismiss</button>`;
+      // one-click remediation buttons (only present when the backend attached
+      // them, which is gated by the beta "remediation" toggle)
+      let actsHtml="";
+      if(!isD && e.actions && e.actions.length){
+        issueActionsMap[e.id]=e.actions.map(a=>({...a, service:e.service}));
+        actsHtml=e.actions.map((a,ai)=>
+          `<button class="link-btn${a.destructive?" danger":""}" onclick="runAction('${e.id}',${ai})">${esc(a.label)}</button>`).join("");
+      }
+      return `<div class="issue ${e.level} ${isD?'dismissed':''}"><div class="stripe"></div>
+        <div class="issue-body">${e.source?`<div class="issue-src">${esc(e.source)}</div>`:""}
+        <div class="issue-msg">${esc(e.message)}${isD?' <em>· dismissed</em>':''}</div>
+        ${e.fix?`<div class="issue-fix"><a href="${esc(e.fix)}" target="_blank" rel="noopener">${e.fix_label?esc(e.fix_label):"View documentation ↗"}</a></div>`:""}
+        <div class="issue-act">${actsHtml}${act}</div></div></div>`;
+    }).join("")+'</div>';
+  }
+  const badge = meta.needs_setup
+    ? `<span class="badge setup"><span class="d"></span>Setup needed</span>`
+    : `<span class="badge ${lc}"><span class="d"></span>${dl==="ok"?"Healthy":dl==="warning"?"Warning":"Error"}</span>`;
+  const setupRow = meta.needs_setup
+    ? `<div class="setup-row"><button class="btn tint" onclick="openSettings('${s.name}')">Add credentials</button></div>` : "";
+  const url = meta.url || "";
+  const title = url
+    ? `<a class="svc svc-link" href="${esc(url)}" target="_blank" rel="noopener" title="Open ${esc(s.name)}" onclick="event.stopPropagation()">${esc(s.name)} <span class="ext">↗</span></a>`
+    : `<span class="svc">${esc(s.name)}</span>`;
+  const inner = `<div class="ch">${title}${badge}</div>
+    <div class="summary">${esc(s.summary)}</div>
+    <div class="checked">Checked ${esc(s.checked||"")}</div>${setupRow}${issuesHtml}`;
+  return { inner, cls:"card "+(meta.needs_setup?"":lc), dl, active, issues, url };
+}
+
+function paint(){
+  const showDismissed = view==="dismissed";
+  document.getElementById("restoreAllBtn").style.display =
+    (showDismissed && Object.keys(dismissedMap).length) ? "inline-flex":"none";
+  const services = visibleServices().sort((a,b)=>rank(b.level)-rank(a.level));
+  const grid=document.getElementById("grid");
+
+  // If the view (active/dismissed) changed, start fresh so the diff is clean.
+  const viewKey = view;
+  if(viewKey !== lastViewKey || grid.querySelector(".skel")){
+    grid.innerHTML=""; cardState={}; lastViewKey=viewKey;
+  }
+
+  let errCount=0, warnCount=0;
+  const present = new Set();   // keys that should remain after this pass
+  let order = [];              // desired DOM order of card keys
+
+  // Pre-build every visible card once so we can both count problems and decide
+  // what to show. A card "needs attention" if it's showing a warning/error or
+  // still needs setup; anything else is healthy.
+  const builts = services.map(s=>({ s, meta: serviceMeta[s.name]||{}, built: buildCard(s, serviceMeta[s.name]||{}, showDismissed) }));
+  builts.forEach(({meta,built})=>{
+    if(showDismissed) return;
+    const hasErr=built.active.some(e=>e.level==="error"), hasWarn=built.active.some(e=>e.level==="warning");
+    if(built.dl==="error"||hasErr)errCount++; else if(built.dl==="warning"||hasWarn)warnCount++;
+  });
+  // In the active view, once something needs attention we hide the healthy cards
+  // so the screen isn't crowded with "Healthy" tiles around the actual problems.
+  const anyProblem = !showDismissed && (errCount>0 || warnCount>0);
+  const needsAttention = (meta, built) =>
+    meta.needs_setup || built.dl==="warning" || built.dl==="error";
+
+  builts.forEach(({s, meta, built})=>{
+    // in the Dismissed tab, only show cards that actually have dismissed issues
+    if(showDismissed && built.issues.length===0) return;
+    // in the Active tab, when there's a problem somewhere, skip healthy cards
+    if(anyProblem && !needsAttention(meta, built)) return;
+
+    const key = s.name;
+    present.add(key); order.push(key);
+    // signature: rebuild DOM only if visible content changed
+    const sig = built.cls + "|" + built.inner;
+    const existing = cardState[key];
+    if(existing && existing.sig === sig){
+      return; // unchanged, leave the DOM node untouched (no flicker, no re-animate)
+    }
+    if(existing){
+      // changed: update in place without re-running the entry animation
+      const prevLevel = existing.dl;
+      existing.el.className = built.cls;
+      existing.el.innerHTML = built.inner;
+      existing.sig = sig;
+      existing.dl = built.dl;
+      // smooth attention pulse on the badge when the status level actually changed
+      if(prevLevel !== built.dl){
+        const b=existing.el.querySelector(".badge");
+        if(b){ b.classList.remove("changed"); void b.offsetWidth; b.classList.add("changed"); }
+      }
+    }else{
+      // new card: create and animate in
+      const el=document.createElement("div");
+      el.className=built.cls;
+      el.innerHTML=built.inner;
+      el.style.animation="rise .5s var(--ease) both";
+      grid.appendChild(el);
+      cardState[key] = { sig, el, dl: built.dl };
+    }
+  });
+
+  // remove cards no longer present (service hidden/disabled, or left dismissed tab)
+  for(const key of Object.keys(cardState)){
+    if(!present.has(key)){
+      cardState[key].el.remove();
+      delete cardState[key];
+    }
+  }
+
+  // ensure DOM order matches desired order (cheap; only moves nodes when needed)
+  let anchor=null;
+  order.forEach(key=>{
+    const el=cardState[key] && cardState[key].el;
+    if(!el) return;
+    if(anchor){ if(anchor.nextSibling!==el) grid.insertBefore(el, anchor.nextSibling); }
+    else { if(grid.firstChild!==el) grid.insertBefore(el, grid.firstChild); }
+    anchor=el;
+  });
+
+  // empty-state placeholders (handled separately so they don't pollute cardState)
+  const shown = order.length;
+  let ph = grid.querySelector(".empty-ph");
+  if(shown===0){
+    const msg = showDismissed ? "No dismissed issues."
+                              : "No services visible. Enable some in Settings.";
+    if(!ph){ ph=document.createElement("div");
+      ph.className="card empty-ph";
+      ph.style.cssText="grid-column:1/-1;text-align:center;color:var(--text-2)";
+      grid.appendChild(ph); }
+    ph.textContent=msg;
+  }else if(ph){ ph.remove(); }
+
+  // hero / all-clear / inline-stats switching
+  const hero=document.getElementById("hero"), icon=document.getElementById("heroIcon");
+  const allClear=document.getElementById("allClear");
+  const inlineStats=document.getElementById("inlineStats");
+  const statsBtn=document.getElementById("statsBtn");
+  const toolbar=document.getElementById("mainToolbar");
+  const footerEl=document.querySelector(".monitor-area footer");
+
+  const healthy = (!showDismissed && services.length && errCount===0 && warnCount===0);
+  const hasDismissed = Object.keys(dismissedMap).length>0;
+
+  if(healthy){
+    // ALL CLEAR: full hero + inline stats, hide cards/compact-hero/stats-button
+    hero.style.display="none";
+    allClear.style.display="block";
+    document.getElementById("acSub").textContent=`${services.length} service${services.length!==1?"s":""} monitored · everything healthy`;
+    inlineStats.style.display="block";
+    statsBtn.style.display="none";
+    grid.style.display="none";
+    footerEl.style.display="none";
+    // keep the Active/Dismissed toggle only if there are dismissed items to look at
+    toolbar.style.display = hasDismissed ? "flex" : "none";
+    toolbar.style.marginTop = hasDismissed ? "clamp(16px,3vw,24px)" : "";
+    loadStats(inlineStats);
+  } else {
+    allClear.style.display="none";
+    inlineStats.style.display="none";
+    toolbar.style.marginTop = "";
+    grid.style.display="";
+    footerEl.style.display="";
+    toolbar.style.display="flex";
+    statsBtn.style.display = showDismissed ? "none" : "grid";  // popup available when issues present
+    hero.style.display = (!showDismissed && services.length)?"flex":"none";
+    if(errCount){ setHero(icon,"err","!",`${errCount} service${errCount>1?"s":""} need attention`,
+        warnCount?`Plus ${warnCount} warning${warnCount>1?"s":""}`:"Errors detected across your stack"); }
+    else if(warnCount){ setHero(icon,"warn","!",`${warnCount} warning${warnCount>1?"s":""}`,"Minor issues to review"); }
+    else{ setHero(icon,"ok","✓","All systems healthy",`${services.length} service${services.length!==1?"s":""} monitored`); }
+  }
+
+  const total=errCount+warnCount;
+  if(total>prevAlertCount && notifyReady) new Notification("GuardTowarr",{body:`${errCount} error(s), ${warnCount} warning(s) detected`});
+  prevAlertCount=total;
+  const t=errCount?`(${errCount}) GuardTowarr`:warnCount?`(${warnCount}) GuardTowarr`:"GuardTowarr";
+  if(document.title!==t) document.title=t;
+
+  // detect services that NEWLY entered an error state → flash + optional sound
+  const nowErr = new Set();
+  visibleServices().forEach(s=>{
+    const active=(s.errors||[]).filter(e=>!dismissedMap[e.id]);
+    const dl = (s.level!=="ok"&&active.length===0)?"ok":s.level;
+    if(dl==="error"||active.some(e=>e.level==="error")) nowErr.add(s.name);
+  });
+  if(!firstLoadAlertSeed){
+    const fresh=[...nowErr].filter(n=>!prevErrorServices.has(n));
+    if(fresh.length){
+      fresh.forEach(n=>{ const c=cardState[n]&&cardState[n].el; if(c){ c.classList.remove("flash"); void c.offsetWidth; c.classList.add("flash"); } });
+      if(uiConfig.sound_enabled) playAlertSound();
+    }
+  }
+  firstLoadAlertSeed=false;
+  prevErrorServices=nowErr;
+
+  // make whole card clickable to open the service (links/buttons stop propagation themselves)
+  order.forEach(key=>{
+    const cs=cardState[key]; if(!cs) return;
+    const url=(serviceMeta[key]||{}).url||"";
+    cs.el.style.cursor = url?"pointer":"default";
+    cs.el.onclick = url ? (ev=>{ if(ev.target.closest("a,button")) return; window.open(url,"_blank","noopener"); }) : null;
+  });
+}
+
+let firstLoadAlertSeed = true;  // don't flash/sound on the very first paint
+
+function playAlertSound(){
+  try{
+    const url = localSoundData || (uiConfig.sound_url||"").trim();
+    if(url){ const a=new Audio(url); a.volume=0.6; a.play().catch(()=>{}); return; }
+    // built-in beep via WebAudio
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type="sine"; o.frequency.value=660;
+    g.gain.setValueAtTime(0.0001,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.25,ctx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.5);
+    o.start(); o.stop(ctx.currentTime+0.5);
+  }catch(e){}
+}
+
+/* ---------- stats panel (shared inline + modal) ---------- */
+let statsCache=null, statsLastFetch=0;
+
+async function loadStats(container){
+  // throttle: reuse cache for 10s to avoid hammering on every paint
+  const now=Date.now();
+  if(statsCache && now-statsLastFetch < 10000){ renderStats(statsCache, container); return; }
+  try{
+    const data=await (await fetch("/api/stats")).json();
+    statsCache=data; statsLastFetch=now;
+    renderStats(data, container);
+  }catch(e){ if(container) container.innerHTML=`<div class="stats-empty">Couldn't load stats.</div>`; }
+}
+
+function fmtTB(bytes){
+  if(!bytes) return "0";
+  const tb=bytes/1099511627776;
+  if(tb>=1) return tb.toFixed(1)+" TB";
+  const gb=bytes/1073741824; return Math.round(gb)+" GB";
+}
+function driveColor(pct){ return pct>=90?"var(--red)":pct>=75?"var(--amber)":"var(--green)"; }
+
+function renderStats(d, container){
+  if(!container || !d || !d.ok){ if(container) container.innerHTML=`<div class="stats-empty">No stats available.</div>`; return; }
+
+  // metric cards (only show ones we have data for)
+  const cards=[];
+  if(d.movies!=null) cards.push(["Movies", Number(d.movies).toLocaleString()]);
+  if(d.episodes!=null) cards.push(["TV episodes", Number(d.episodes).toLocaleString()]);
+  if(d.torrents!=null) cards.push(["Active torrents", d.torrents]);
+  // overall uptime = min across services (worst link), or average
+  let up=null;
+  if(d.uptime && Object.keys(d.uptime).length){
+    const vals=Object.values(d.uptime); up=(vals.reduce((a,b)=>a+b,0)/vals.length);
+  }
+  const metricsHtml = cards.map(c=>`<div class="sm-card"><div class="sm-label">${esc(c[0])}</div><div class="sm-val">${esc(String(c[1]))}</div></div>`).join("")
+    + (up!=null?`<div class="sm-card"><div class="sm-label">30-day uptime</div><div class="sm-val good">${up.toFixed(1)}%</div></div>`:"");
+
+  // when both media servers run, show their libraries broken out per server
+  let perServerHtml="";
+  if(d.library_by_server && d.library_by_server.length){
+    const rows=d.library_by_server.map(ls=>
+      `<div class="lib-row"><span class="lib-srv">${esc(ls.server)}</span>
+        <span class="lib-nums">${Number(ls.movies||0).toLocaleString()} movies · ${Number(ls.episodes||0).toLocaleString()} episodes</span></div>`).join("");
+    perServerHtml=`<div class="stats-box" style="margin-bottom:12px"><h4>Library by server</h4>${rows}</div>`;
+  }
+
+  // now playing: combined across Plex and/or Jellyfin. Falls back to the old
+  // single "plex" key if that's all the backend sent.
+  let npHtml="";
+  const np = d.now_playing || (d.plex ? {count:d.plex.count, streams:d.plex.streams, sources:["Plex"],
+                                          transcoding:(d.plex.streams||[]).filter(s=>s.mode==="transcode").length,
+                                          direct:(d.plex.streams||[]).filter(s=>s.mode!=="transcode").length} : null);
+  if(np){
+    const streams=np.streams||[];
+    const multiSource = (np.sources||[]).length>1;
+    const rows = streams.length ? streams.map((s,i)=>{
+      const ic = s.type==="episode"?"ti-device-tv":"ti-movie";
+      const cacheBust = (s.title||"").length + (s.progress||0);
+      // when more than one server is feeding the list, tag each row with its source
+      const srcTag = multiSource && s.source ? `<span class="np-src">${esc(s.source)}</span>` : "";
+      const paused = s.paused ? " · paused" : "";
+      // posters load via <img>, which can't send headers, so pass the token in the URL on the public view
+      const ptok = GT_PUBLIC && publicToken ? `&t=${encodeURIComponent(publicToken)}` : "";
+      return `<div class="np-row"><div class="np-thumb"><i class="ti ${ic}" style="font-size:16px"></i>
+        <img class="np-img" src="/api/poster?i=${i}&c=${cacheBust}${ptok}" alt="" loading="lazy"
+          onload="this.style.opacity=1" onerror="this.remove()"></div>
+        <div class="np-meta"><div class="np-title">${esc(s.title||"Unknown")}${srcTag}</div>
+        <div class="np-sub">${esc(s.user||"")}${s.mode?" · "+esc(s.mode):""}${s.res?" · "+esc(s.res):""}${paused}</div>
+        <div class="np-bar"><span style="width:${Math.min(100,s.progress||0)}%"></span></div></div></div>`;
+    }).join("") : `<div class="stats-empty">Nothing playing right now.</div>`;
+    // header: name the source(s), and show a transcode/direct breakdown when streaming
+    const label = (np.sources||[]).length ? (np.sources||[]).join(" + ") : "media server";
+    let breakdown = "";
+    if(np.count){
+      const parts=[];
+      if(np.direct) parts.push(`${np.direct} direct`);
+      if(np.transcoding) parts.push(`${np.transcoding} transcoding`);
+      if(parts.length) breakdown = `<div class="np-breakdown">${parts.join(" · ")}</div>`;
+    }
+    npHtml=`<div class="stats-box"><h4 style="display:flex;justify-content:space-between;align-items:center">
+      <span>Now playing${(np.sources||[]).length?" on "+esc(label):""}</span><span class="np-pill">${np.count} stream${np.count!==1?"s":""}</span></h4>${breakdown}${rows}</div>`;
+  }
+
+  // storage (one bar per drive)
+  let storeHtml="";
+  if(d.drives && d.drives.length){
+    const bars=d.drives.map(dr=>{
+      const usedTB=fmtTB(dr.used), totalTB=fmtTB(dr.total);
+      return `<div class="drive"><div class="drive-h"><span class="dn"><i class="ti ti-server" style="font-size:13px;vertical-align:-1px;margin-right:5px;color:var(--text-2)"></i>${esc(dr.label||dr.path)}</span>
+        <span class="dv">${usedTB} / ${totalTB}</span></div>
+        <div class="drive-bar"><span style="width:${Math.min(100,dr.pct)}%;background:${driveColor(dr.pct)}"></span></div></div>`;
+    }).join("");
+    storeHtml=`<div class="stats-box"><h4>Storage</h4>${bars}</div>`;
+  }
+
+  const rowHtml = (npHtml||storeHtml) ? `<div class="stats-row">${npHtml||"<div></div>"}${storeHtml||"<div></div>"}</div>` : "";
+
+  // streams history graph
+  let graphHtml="";
+  if(d.stream_history && d.stream_history.length>1){
+    graphHtml=`<div class="stats-box"><h4>Streams · last 24h</h4>
+      <div style="position:relative;height:110px"><canvas id="statCanvas_${container.id}" role="img" aria-label="Streams over the last 24 hours"></canvas></div></div>`;
+  }
+
+  const liteNote = d.lite ? `<div class="beta-note" style="margin-bottom:12px">Lite stats mode is on. Library, now-playing and storage lookups are skipped to ease server load. Monitoring, warnings and alerts are unaffected.</div>` : "";
+  container.innerHTML = `${liteNote}<div class="stats-metrics">${metricsHtml}</div>${perServerHtml}${rowHtml}${graphHtml}`;
+
+  // draw graph if present
+  if(d.stream_history && d.stream_history.length>1 && window.Chart){
+    const cv=document.getElementById(`statCanvas_${container.id}`);
+    if(cv){
+      if(cv._chart) cv._chart.destroy();
+      cv._chart=new Chart(cv,{type:"line",data:{labels:d.stream_history.map(()=>""),
+        datasets:[{data:d.stream_history,borderColor:"#e5a00d",backgroundColor:"rgba(229,160,13,.12)",fill:true,tension:.4,pointRadius:0,borderWidth:2}]},
+        options:{responsive:true,maintainAspectRatio:false,scales:{x:{display:false},
+          y:{display:true,beginAtZero:true,suggestedMax:3,ticks:{stepSize:1,color:"#9a9b9c",font:{size:10}},grid:{color:"rgba(128,128,128,.12)"}}},
+          plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+    }
+  }
+}
+
+async function openStats(){
+  document.getElementById("statsOverlay").classList.add("show");
+  const body=document.getElementById("statsModalBody");
+  body.innerHTML=`<div class="tor-empty">Loading…</div>`;
+  await loadStats(body);
+}
+function closeStats(){ document.getElementById("statsOverlay").classList.remove("show"); }
+
+const HELP_TOPICS = {
+  public: {
+    title: "Remote access", sub: "Monitor (and request) from outside your network",
+    body: `<p>This opens a <b>second, restricted port</b> you can reach from outside your home. It shows live service status, and (if you allow it) lets you search and request media. It never exposes your API keys, passwords, or internal addresses.</p>
+      <p style="font-weight:600;margin:14px 0 6px">How to use it safely</p>
+      <ol>
+        <li>Set a long, random <b>access token</b> (use Generate). Anyone with the token can use the endpoint, so treat it like a password.</li>
+        <li>Put the port behind an <b>HTTPS reverse proxy</b> (Caddy, Nginx Proxy Manager, Traefik, SWAG). The token travels with each request, so plain HTTP is not safe.</li>
+        <li>For real protection, add the proxy's own <b>login</b> in front, such as Authelia, Authentik, Cloudflare Access, or basic auth.</li>
+        <li>Leave <b>Allow content requests</b> off unless you want remote adds; with it off, the endpoint is monitor-only.</li>
+      </ol>
+      <p class="help-note">It's off by default and only starts after you save and restart. Never forward the raw port straight to the internet.</p>`
+  },
+  notifications: {
+    title: "How notifications work", sub: "Phone push or Discord, your choice",
+    body: `<p>GuardTowarr can send alerts via <b>ntfy</b> (phone push), to a <b>Discord</b> channel, or both. Turn on whichever you want under Delivery.</p>
+      <p style="font-weight:600;margin-bottom:8px">ntfy (phone push)</p>
+      <ol>
+        <li>Install the <b>ntfy</b> app on your phone (App Store or Google Play).</li>
+        <li>Pick a <b>topic</b> name that's hard to guess, like <code>guardtowarr-7h2k9p</code>. Anyone who knows it can read the alerts, so treat it like a password.</li>
+        <li>In the ntfy app, tap <b>+</b> and subscribe to that exact topic.</li>
+        <li>Enter the same topic here and save. Self-hosting ntfy? Change the server field to your own address.</li>
+      </ol>
+      <p style="font-weight:600;margin:14px 0 8px">Discord</p>
+      <ol>
+        <li>In your Discord server, open <b>Channel settings → Integrations → Webhooks</b>.</li>
+        <li>Click <b>New Webhook</b>, optionally name it, then <b>Copy Webhook URL</b>.</li>
+        <li>Paste that URL here and save. Alerts post as color-coded cards.</li>
+      </ol>
+      <p class="help-note">Tap <b>Send test notification</b> to confirm whichever channels you enabled are working.</p>`
+  },
+  quiet: {
+    title: "Quiet hours", sub: "Sleep without the buzzing",
+    body: `<p>During quiet hours, alerts are held instead of sent. When the window ends, you get a single <b>summary</b> of anything that happened overnight, so you're informed without being woken up.</p>
+      <p>A service that broke and recovered while you slept is shown as a brief "had a blip" rather than two separate alerts.</p>
+      <p class="help-note">Set the From/Until times below. Overnight ranges (e.g. 23:00 to 07:00) work as expected.</p>`
+  },
+  torrent_done: {
+    title: "Torrent finished alerts", sub: "Know when a download is ready",
+    body: `<p>Get a notification the moment a download completes, with the clean title pulled from Radarr or Sonarr (e.g. "Dune: Part Two finished downloading") instead of the raw release name.</p>
+      <p>Works best with <b>qBittorrent</b> configured, since it watches torrent state directly. It respects quiet hours like other alerts.</p>
+      <p class="help-note">This is a beta feature and may be rough around the edges.</p>`
+  },
+  remediation: {
+    title: "Diagnose & fix", sub: "Catch download problems, and fix them in place",
+    body: `<p>Standard monitoring tells you whether each service is up or down. This adds a deeper layer for your download pipeline: it reads your <b>Radarr/Sonarr download queues</b> and surfaces problems the basic checks miss (stalled torrents, downloads stuck with no seeds, and failed imports), then lets you act on them without leaving the dashboard.</p>
+      <p style="font-weight:600;margin:14px 0 6px">What it adds</p>
+      <ul style="margin:0 0 14px;padding-left:20px;display:flex;flex-direction:column;gap:6px">
+        <li style="font-size:14px"><b>Stuck-download detection</b> from the Radarr/Sonarr queues, surfaced as issues on the dashboard.</li>
+        <li style="font-size:14px"><b>Test download clients</b> / <b>Re-test indexers</b> on the matching health warnings.</li>
+        <li style="font-size:14px"><b>Force re-check</b> and <b>Re-announce</b> on stalled qBittorrent torrents.</li>
+        <li style="font-size:14px"><b>Remove + blocklist + re-search</b> for a genuinely bad download, in one click.</li>
+      </ul>
+      <p class="help-note"><b>Nothing happens on its own</b>. Every fix is a button you choose to press, and anything that deletes a download asks you to confirm first. <b>Turning it off</b> hides the buttons <i>and</i> stops the deeper queue checks (so stuck downloads are no longer detected or shown), plus the extra polling. Your core up/down monitoring and alerts keep working either way.</p>`
+  },
+  lite_stats: {
+    title: "Lite stats mode", sub: "Easier on low-power servers",
+    body: `<p>The Stats panel normally gathers a lot of live detail: total movie/episode counts, what's playing right now, per-server libraries, and drive storage. Each of those means extra requests to Plex, Jellyfin and the *arr apps every time the dashboard refreshes. On a small box (a Pi, a NAS) that's also running those services, it can add up.</p>
+      <p><b>Lite stats mode</b> turns the Stats panel down to only what GuardTowarr already knows locally: your uptime/downtime figures and recent activity. No extra calls to your media servers or *arr apps are made for stats.</p>
+      <p style="font-weight:600;margin:14px 0 6px">What you gain</p>
+      <ul style="margin:0 0 14px;padding-left:20px;display:flex;flex-direction:column;gap:6px">
+        <li style="font-size:14px">Much lower server load from an open dashboard.</li>
+        <li style="font-size:14px">Fewer requests hitting Plex/Jellyfin/*arr in the background.</li>
+      </ul>
+      <p style="font-weight:600;margin:0 0 6px">What you give up</p>
+      <ul style="margin:0 0 14px;padding-left:20px;display:flex;flex-direction:column;gap:6px">
+        <li style="font-size:14px">No live now-playing, library totals or storage in the Stats panel.</li>
+        <li style="font-size:14px">The "streams · last 24h" graph is hidden while it's on.</li>
+      </ul>
+      <p class="help-note"><b>Your monitoring is not affected.</b> Health checks, warnings, errors, uptime history and all notifications keep working exactly the same; this only trims the cosmetic Stats panel.</p>`
+  },
+  readarr_forks: {
+    title: "Readarr & compatible forks", sub: "Books & audiobooks",
+    body: `<p>The original <b>Readarr</b> project has been <b>retired</b> and is no longer actively maintained. GuardTowarr can still monitor it, and it should also work with <b>community forks and successor projects</b> that carry Readarr forward, as long as they keep speaking the same Readarr-style API.</p>
+      <p>Because those forks are separate projects, we can't promise they'll always work. If a future version changes how its API behaves, monitoring or search for it may stop working until GuardTowarr is updated to match.</p>
+      <p class="help-note">In short: point this at Readarr or a compatible fork and it should just work today, but treat ongoing support as best-effort, not guaranteed.</p>`
+  },
+  torrents_view: {
+    title: "Active torrents", sub: "What's downloading and seeding",
+    body: `<p>Shows your current torrents in two tabs, downloading and seeding.</p>
+      <p>If <b>qBittorrent</b> is set up, this reads from it directly with full detail (live speeds, ratio, ETA). If not, it falls back to the <b>Radarr/Sonarr download queue</b>, which works with any client (Transmission, Deluge, etc.) but shows active downloads only.</p>`
+  }
+};
+function openHelp(topic){
+  const h=HELP_TOPICS[topic]; if(!h) return;
+  document.getElementById("helpTitle").textContent=h.title;
+  document.getElementById("helpSub").textContent=h.sub||"";
+  document.getElementById("helpBody").innerHTML=h.body;
+  document.getElementById("helpOverlay").classList.add("show");
+}
+function closeHelp(){ document.getElementById("helpOverlay").classList.remove("show"); }
+// back-compat for the existing notifications button
+function openNotifHelp(){ openHelp("notifications"); }
+
+/* ---------- update notification ---------- */
+let updateInfo=null;
+const UPD_DISMISS_KEY="gt_update_dismissed";  // {version, ts}
+
+function updateDismissedRecently(version){
+  try{
+    const raw=localStorage.getItem(UPD_DISMISS_KEY);
+    if(!raw) return false;
+    const d=JSON.parse(raw);
+    // same version dismissed, and within the 7-day cooldown
+    const week=7*86400*1000;
+    return d.version===version && (Date.now()-d.ts) < week;
+  }catch(e){ return false; }
+}
+function dismissUpdate(){
+  if(updateInfo && updateInfo.version){
+    try{ localStorage.setItem(UPD_DISMISS_KEY, JSON.stringify({version:updateInfo.version, ts:Date.now()})); }catch(e){}
+  }
+  document.getElementById("updCard").style.display="none";
+}
+async function checkUpdate(){
+  if(GT_PUBLIC) return;   // the update notice is owner-only
+  try{
+    const info=await (await fetch("/api/update")).json();
+    updateInfo=info;
+    const card=document.getElementById("updCard");
+    if(!info || !info.available || updateDismissedRecently(info.version)){
+      card.style.display="none"; return;
+    }
+    document.getElementById("updVer").textContent=info.version;
+    let sub=`You're on ${info.current||""}`;
+    if(info.published){
+      const days=Math.floor((Date.now()-Date.parse(info.published))/86400000);
+      sub += days<=0?" · released today":days===1?" · released yesterday":` · released ${days} days ago`;
+    }
+    document.getElementById("updSub").textContent=sub;
+    const notes=document.getElementById("updNotes");
+    const bullets=info.bullets||[];
+    if(bullets.length){
+      notes.style.display="block";
+      notes.innerHTML=`<div class="nh">WHAT'S NEW</div><ul>${bullets.map(b=>`<li>${esc(b)}</li>`).join("")}</ul>`
+        + (info.has_more?`<div class="more">See all on GitHub →</div>`:"");
+    } else { notes.style.display="none"; notes.innerHTML=""; }
+    document.getElementById("updLink").href=info.url||"#";
+    card.style.display="block";
+  }catch(e){ /* offline or check disabled, stay quiet */ }
+}
+
+function setHero(icon,cls,sym,l1,l2){
+  const want="hero-icon "+cls;
+  if(icon.className!==want) icon.className=want;
+  if(icon.textContent!==sym) icon.textContent=sym;
+  const e1=document.getElementById("heroL1"), e2=document.getElementById("heroL2");
+  if(e1.textContent!==l1) e1.textContent=l1;
+  if(e2.textContent!==l2) e2.textContent=l2;
+}
+
+/* ---------- dismiss ---------- */
+async function dismiss(id){
+  const issue=servicesCache.flatMap(s=>s.errors||[]).find(e=>e.id===id)||{};
+  await fetch("/api/dismiss",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({id,service:issue.service,message:issue.message})}); refresh();
+}
+async function restore(id){ await fetch("/api/restore",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id})}); refresh(); }
+
+/* ---------- one-click remediation ---------- */
+async function runAction(issueId, idx){
+  const list=issueActionsMap[issueId]||[];
+  const a=list[idx]; if(!a) return;
+  // destructive actions (remove/blocklist) confirm first; the backend supplies
+  // a cause-aware message (e.g. warning that this won't fix a stalled torrent)
+  if(a.destructive){
+    const msg = a.confirm || `${a.label}?\n\nThis removes the download and blocklists the release so it won't be grabbed again.`;
+    if(!confirm(msg)) return;
+  }
+  toast(`${a.label}…`);
+  try{
+    const r=await (await fetch("/api/action",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({service:a.service, action:a.action, params:a.params})})).json();
+    toast(r.ok ? (r.message||"Done.") : ("Failed: "+(r.error||"unknown error")));
+    setTimeout(refresh, 900);   // re-poll so a resolved issue clears
+  }catch(e){ toast("Action failed."); }
+}
+async function restoreAll(){ await fetch("/api/restore",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:"__all__"})}); refresh(); }
+
+/* ---------- manual refresh ---------- */
+async function manualRefresh(){
+  const b=document.getElementById("refreshBtn"); b.classList.add("spin"); setTimeout(()=>b.classList.remove("spin"),800);
+  await fetch("/api/refresh",{method:"POST"}); setTimeout(refresh,600);
+}
+
+/* ---------- settings ---------- */
+let settingsTab = "general";
+let notifSeverity = "error";
+
+function setSettingsTab(t){
+  settingsTab = t;
+  document.querySelectorAll(".tabbar .tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===t));
+  document.querySelectorAll(".tabpane").forEach(p=>{
+    const on = p.dataset.pane===t;
+    p.style.display = on ? "" : "none";
+    p.classList.toggle("active-pane", on);
+  });
+  // Services tab widens the box into two columns; every other tab stays narrow.
+  // (CSS eases the width and drops back to one column on small screens.)
+  const modal = document.querySelector(".settings-modal");
+  if(modal) modal.classList.toggle("services-wide", t==="services");
+  const groups = document.getElementById("serviceGroups");
+  if(groups) groups.classList.toggle("cols", t==="services");
+}
+
+async function openSettings(focusService){
+  if(GT_PUBLIC) return;   // settings are never reachable on the public view
+  fullConfig = await (await fetch("/api/config")).json();
+  applyTheme(fullConfig.theme||"auto");
+  document.querySelectorAll("#themeSeg button").forEach(btn=>btn.classList.toggle("active",btn.dataset.theme===theme));
+  document.getElementById("intervalInput").value = fullConfig.poll_interval||30;
+  document.getElementById("portInput").value = fullConfig.port||9595;
+  // general: ui prefs
+  const ui = fullConfig.ui || {};
+  document.getElementById("uiUpdateCheck").checked = ui.update_check !== false;
+  document.getElementById("uiSound").checked = !!ui.sound_enabled;
+  document.getElementById("uiSoundUrl").value = ui.sound_url || "";
+  syncSoundFields();
+  document.getElementById("uiSound").onchange = syncSoundFields;
+  // remote access (public endpoint)
+  const pub = fullConfig.public || {};
+  document.getElementById("pubEnabled").checked = !!pub.enabled;
+  document.getElementById("pubPort").value = pub.port || 9596;
+  document.getElementById("pubToken").value = pub.token || "";
+  document.getElementById("pubAllowRequests").checked = !!pub.allow_requests;
+  document.getElementById("pubAllowActions").checked = !!pub.allow_actions;
+  syncPubFields();
+  document.getElementById("pubEnabled").onchange = onPubEnableChange;
+  document.getElementById("pubAllowActions").onchange = onPubAllowActionsChange;
+  renderServiceGroups(focusService);
+  renderNotifSettings();
+  renderBetaSettings();
+  setSettingsTab(focusService?"services":"general");
+  document.getElementById("settingsOverlay").classList.add("show");
+}
+function syncSoundFields(){
+  document.getElementById("soundFields").classList.toggle("dim", !document.getElementById("uiSound").checked);
+}
+function syncPubFields(){
+  document.getElementById("pubFields").classList.toggle("dim", !document.getElementById("pubEnabled").checked);
+}
+function onPubEnableChange(){
+  syncPubFields();
+  // turning it ON requires acknowledging the risk disclaimer first
+  if(document.getElementById("pubEnabled").checked){
+    document.getElementById("pubDisclaimerOverlay").classList.add("show");
+  }
+}
+function cancelPublicDisclaimer(){
+  document.getElementById("pubEnabled").checked = false;
+  syncPubFields();
+  document.getElementById("pubDisclaimerOverlay").classList.remove("show");
+}
+function acceptPublicDisclaimer(){
+  document.getElementById("pubDisclaimerOverlay").classList.remove("show");
+  if(!document.getElementById("pubToken").value.trim()) genPubToken();   // ensure a token exists
+}
+function genPubToken(){
+  const a=new Uint8Array(24); crypto.getRandomValues(a);
+  let s=""; a.forEach(b=>s+=("0"+b.toString(16)).slice(-2));
+  document.getElementById("pubToken").value = s;
+}
+function onPubAllowActionsChange(){
+  // enabling remote fixes (some destructive) gets an explicit confirm
+  const el=document.getElementById("pubAllowActions");
+  if(el.checked && !confirm("Allow remediation from the public endpoint?\n\nToken-holders will be able to run fixes remotely, including DESTRUCTIVE ones (remove + blocklist + re-search) and re-announce. Only enable this behind a trusted reverse-proxy login.")){
+    el.checked=false;
+  }
+}
+function onSoundFilePicked(ev){
+  const f=ev.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{ localSoundData=rd.result; document.getElementById("soundFileNote").textContent=`Using local file: ${f.name} (this session)`; };
+  rd.readAsDataURL(f);
+}
+function previewSound(){
+  // temporarily reflect the URL field for preview
+  const u=document.getElementById("uiSoundUrl").value.trim();
+  const prev=uiConfig.sound_url; uiConfig.sound_url=u;
+  playAlertSound();
+  uiConfig.sound_url=prev;
+}
+function closeSettings(){ document.getElementById("settingsOverlay").classList.remove("show"); applyTheme(theme); }
+function setTheme(t){ applyTheme(t); document.querySelectorAll("#themeSeg button").forEach(b=>b.classList.toggle("active",b.dataset.theme===t)); }
+
+function renderNotifSettings(){
+  const n = fullConfig.notifications || {};
+  document.getElementById("notifEnabled").checked = !!n.enabled;
+  document.getElementById("ntfyEnabled").checked = n.ntfy_enabled !== false;
+  document.getElementById("notifServer").value = n.ntfy_server || "https://ntfy.sh";
+  document.getElementById("notifTopic").value = n.topic || "";
+  document.getElementById("discordEnabled").checked = !!n.discord_enabled;
+  document.getElementById("discordWebhook").value = n.discord_webhook || "";
+  document.getElementById("pushoverEnabled").checked = !!n.pushover_enabled;
+  document.getElementById("pushoverToken").value = n.pushover_token || "";
+  document.getElementById("pushoverUser").value = n.pushover_user || "";
+  document.getElementById("notifRecovery").checked = n.notify_recovery !== false;
+  document.getElementById("quietEnabled").checked = !!n.quiet_enabled;
+  document.getElementById("quietStart").value = n.quiet_start || "23:00";
+  document.getElementById("quietEnd").value = n.quiet_end || "07:00";
+  document.getElementById("notifTorrentDone").checked = !!n.torrent_done;
+  setNotifSeverity(n.severity || "error");
+  const box=document.getElementById("notifIgnore"); box.innerHTML="";
+  const ignore = new Set(n.ignore_services || []);
+  Object.keys(fullConfig.services).forEach(name=>{
+    // don't offer services the user has turned off, so there's nothing to mute
+    if((fullConfig.services[name]||{}).disabled) return;
+    const chip=document.createElement("button");
+    chip.className="chip"+(ignore.has(name)?" on":"");
+    chip.textContent=name; chip.dataset.svc=name;
+    chip.onclick=()=>chip.classList.toggle("on");
+    box.appendChild(chip);
+  });
+  syncNotifFieldsState();
+  document.getElementById("notifEnabled").onchange = syncNotifFieldsState;
+  document.getElementById("quietEnabled").onchange = syncNotifFieldsState;
+  document.getElementById("ntfyEnabled").onchange = syncNotifFieldsState;
+  document.getElementById("discordEnabled").onchange = syncNotifFieldsState;
+  document.getElementById("pushoverEnabled").onchange = syncNotifFieldsState;
+}
+function syncNotifFieldsState(){
+  const hide=(id,cond)=>document.getElementById(id).classList.toggle("hidden",cond);
+  document.getElementById("notifFields").classList.toggle("off", !document.getElementById("notifEnabled").checked);
+  hide("quietFields", !document.getElementById("quietEnabled").checked);
+  hide("ntfyFields", !document.getElementById("ntfyEnabled").checked);
+  hide("discordFields", !document.getElementById("discordEnabled").checked);
+  hide("pushoverFields", !document.getElementById("pushoverEnabled").checked);
+}
+function setNotifSeverity(s){
+  notifSeverity=s;
+  document.querySelectorAll("#notifSeverity button").forEach(b=>b.classList.toggle("active",b.dataset.sev===s));
+}
+function renderBetaSettings(){
+  const b=fullConfig.beta||{};
+  document.getElementById("betaRemediation").checked = b.remediation !== false;
+  document.getElementById("betaLiteStats").checked = !!b.lite_stats;
+}
+
+async function testNotify(){
+  // save first so the server has the latest settings, then test each enabled channel
+  collectSettings();
+  await fetch("/api/config",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({config:fullConfig})});
+  toast("Sending test…");
+  const r=await (await fetch("/api/test-notify",{method:"POST"})).json();
+  if(r.ok && (!r.failed || !r.failed.length)){
+    toast("Test sent via "+(r.sent||[]).join(" & "));
+  } else if(r.ok){
+    toast("Sent via "+(r.sent||[]).join(" & ")+"; failed: "+r.failed.join(", "));
+  } else {
+    toast("Test failed: "+(r.error||"no channel enabled"));
+  }
+}
+
+function renderServiceGroups(focus){
+  const box=document.getElementById("serviceGroups"); box.innerHTML="";
+  // services we want to flag as beta/limited when they're being set up
+  const BETA_NOTE={
+    jellyfin: "Beta: Jellyfin support is limited to monitoring and live stats (now-playing). Search, requests, and other features aren't available yet.",
+    tunarr: "Beta: covers reachability and Tunarr's own health checks (ffmpeg, hardware acceleration, etc.). Channels and stats aren't surfaced yet."
+  };
+  // per-service ⓘ info popups (keyed by instance name) -> a HELP_TOPICS key
+  const SERVICE_HELP={ readarr: "readarr_forks" };
+  // The backend sends each service's exact field list in the catalog; use that
+  // so every service type (including newer ones like seerr/jellyfin) renders its
+  // fields. Fall back to the per-type defaults only if the catalog isn't loaded.
+  const fieldsFor = (name, svc) => {
+    const cat = serviceCatalog.find(c => c.service === name);
+    if (cat && cat.fields && cat.fields.length) return cat.fields;
+    // Fall back to another catalog entry of the same type, still backend-derived
+    // (from SERVICE_REGISTRY), so it can never go stale the way a hardcoded field
+    // map could. Only if the catalog is entirely absent do we show just the URL.
+    const byType = serviceCatalog.find(c => c.type === svc.type && c.fields && c.fields.length);
+    return byType ? byType.fields : ["url"];
+  };
+  // Display order by popularity of use: media servers first (they drive what
+  // everyone actually watches), then the download client, then the *arr managers,
+  // then the request portals. Ordered by service TYPE so instances within a type
+  // (the five *arr apps) keep their natural order; unknown/new types fall to the end.
+  const TYPE_ORDER={plex:0, jellyfin:1, qbit:2, arr:3, ombi:4, seerr:5};
+  const typeRank=t=>(t in TYPE_ORDER ? TYPE_ORDER[t] : 99);
+  const orderedServices=Object.entries(fullConfig.services)
+    .sort((a,b)=>typeRank(a[1].type)-typeRank(b[1].type));
+  for(const [name,svc] of orderedServices){
+    const req=fieldsFor(name, svc);
+    const fields=req.map(f=>{
+      const val=esc(svc[f]||"");
+      const type=f==="password"?"password":"text";
+      return `<div class="field"><label>${FIELD_LABELS[f]||f}</label>
+        <input data-svc="${name}" data-field="${f}" type="${type}" value="${val}" placeholder="${FIELD_LABELS[f]||f}"></div>`;
+    }).join("");
+    const note = BETA_NOTE[svc.type] ? `<div class="beta-note">${esc(BETA_NOTE[svc.type])}</div>` : "";
+    const betaTag = BETA_NOTE[svc.type] ? ` <span class="beta-tag">beta</span>` : "";
+    const infoBtn = SERVICE_HELP[name]
+      ? `<button class="info-btn" onclick="openHelp('${SERVICE_HELP[name]}')" title="About ${esc(name)}" aria-label="About ${esc(name)}">ⓘ</button>` : "";
+    const open = focus===name;
+    box.insertAdjacentHTML("beforeend",`
+      <div class="group">
+        <div class="group-h">
+          <span class="gname">${name}${betaTag}${infoBtn}</span>
+          <button class="btn" style="padding:6px 12px" onclick="toggleGroup('${name}')">Edit</button>
+        </div>
+        <div class="toggle-line">
+          <div><div class="tl-text">Enable this service</div><div class="tl-sub">Off = not monitored, hidden, and never prompted</div></div>
+          <label class="switch"><input type="checkbox" data-svc="${name}" data-flag="active" ${svc.disabled?"":"checked"}><span class="track"></span></label>
+        </div>
+        <div class="group-fields ${open?"":"collapsed"}" id="gf-${name}">${note}${fields}</div>
+      </div>`);
+  }
+}
+function toggleGroup(name){ document.getElementById("gf-"+name).classList.toggle("collapsed"); }
+
+function collectSettings(){
+  // gather all settings tabs into fullConfig (no network)
+  fullConfig.theme = theme;
+  fullConfig.poll_interval = Math.max(5, parseInt(document.getElementById("intervalInput").value)||30);
+  fullConfig.port = Math.min(65535, Math.max(1, parseInt(document.getElementById("portInput").value)||9595));
+  document.querySelectorAll('#serviceGroups input[data-field]').forEach(inp=>{
+    fullConfig.services[inp.dataset.svc][inp.dataset.field] = inp.value.trim();
+  });
+  document.querySelectorAll('#serviceGroups input[data-flag]').forEach(inp=>{
+    const svc=fullConfig.services[inp.dataset.svc];
+    // one toggle now: enabled = monitored AND shown; off = disabled AND hidden
+    if(inp.dataset.flag==="active"){ svc.disabled = !inp.checked; svc.hidden = !inp.checked; }
+  });
+  // notifications
+  const ignore=[...document.querySelectorAll('#notifIgnore .chip.on')].map(c=>c.dataset.svc);
+  fullConfig.notifications = {
+    enabled: document.getElementById("notifEnabled").checked,
+    ntfy_enabled: document.getElementById("ntfyEnabled").checked,
+    ntfy_server: document.getElementById("notifServer").value.trim() || "https://ntfy.sh",
+    topic: document.getElementById("notifTopic").value.trim(),
+    discord_enabled: document.getElementById("discordEnabled").checked,
+    discord_webhook: document.getElementById("discordWebhook").value.trim(),
+    pushover_enabled: document.getElementById("pushoverEnabled").checked,
+    pushover_token: document.getElementById("pushoverToken").value.trim(),
+    pushover_user: document.getElementById("pushoverUser").value.trim(),
+    severity: notifSeverity,
+    notify_recovery: document.getElementById("notifRecovery").checked,
+    ignore_services: ignore,
+    quiet_enabled: document.getElementById("quietEnabled").checked,
+    quiet_start: document.getElementById("quietStart").value || "23:00",
+    quiet_end: document.getElementById("quietEnd").value || "07:00",
+    torrent_done: document.getElementById("notifTorrentDone").checked
+  };
+  // ui prefs
+  fullConfig.ui = {
+    update_check: document.getElementById("uiUpdateCheck").checked,
+    sound_enabled: document.getElementById("uiSound").checked,
+    sound_url: document.getElementById("uiSoundUrl").value.trim()
+  };
+  // stability options
+  fullConfig.beta = {
+    torrents: true,
+    lite_stats: document.getElementById("betaLiteStats").checked,
+    remediation: document.getElementById("betaRemediation").checked
+  };
+  // remote access (public endpoint)
+  fullConfig.public = {
+    enabled: document.getElementById("pubEnabled").checked,
+    port: Math.min(65535, Math.max(1, parseInt(document.getElementById("pubPort").value)||9596)),
+    token: document.getElementById("pubToken").value.trim(),
+    allow_requests: document.getElementById("pubAllowRequests").checked,
+    allow_actions: document.getElementById("pubAllowActions").checked
+  };
+}
+
+async function saveSettings(){
+  const prevPort = fullConfig.port;
+  const prevPublic = JSON.stringify(fullConfig.public||{});
+  collectSettings();
+  // a public endpoint with no token would refuse to start; block the save instead
+  if(fullConfig.public.enabled && !fullConfig.public.token){
+    toast("Set an access token for the public endpoint first."); return;
+  }
+  const portChanged = fullConfig.port !== prevPort;
+  const publicChanged = JSON.stringify(fullConfig.public) !== prevPublic;
+  const newPort = fullConfig.port;
+  const r=await (await fetch("/api/config",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({config:fullConfig})})).json();
+  if(r.ok){ closeSettings(); uiConfig=fullConfig.ui;
+    if(portChanged){
+      toast(`Saved. Restart GuardTowarr, then reopen at port ${newPort}.`);
+    } else if(publicChanged){
+      toast("Saved. Restart GuardTowarr to apply the remote-access change.");
+    } else {
+      toast("Settings saved"); setTimeout(refresh,400); setTimeout(checkUpdate,500);
+    }
+  }
+  else toast("Save failed: "+(r.error||""));
+}
+
+/* ---------- onboarding (two-step: pick services, then enter creds) ---------- */
+let onboardShown=false;
+let pickedServices=new Set();
+// The setup tiles describe each service using the blurb the backend sends in
+// the service catalog (which comes from the service registry in monitor.py), so
+// this list stays correct automatically as services are added -- nothing to
+// keep in sync here. We keep a tiny fallback map only for safety if a blurb is
+// ever missing.
+const SERVICE_BLURB_FALLBACK={arr:"Movies / TV / indexer", plex:"Media server", qbit:"Torrent client", ombi:"Requests"};
+
+function maybeOnboard(){
+  if(GT_PUBLIC) return;   // never onboard on the restricted public view
+  if(onboardShown) return;
+  // Only auto-run on first launch (before the user has completed setup once).
+  if(setupComplete) return;
+  if(!serviceCatalog.length) return;
+  onboardShown=true;
+  buildPickStep();
+  onboardBackToStep1();
+  document.getElementById("onboardOverlay").classList.add("show");
+}
+
+function buildPickStep(){
+  // default selection: services that look configured (not disabled) start selected
+  pickedServices=new Set();
+  const grid=document.getElementById("pickGrid"); grid.innerHTML="";
+  serviceCatalog.forEach(s=>{
+    const meta=serviceMeta[s.service]||{};
+    const preselect=!meta.disabled;          // services start off, so tiles start unchecked; the user picks what they use
+    if(preselect) pickedServices.add(s.service);
+    const tile=document.createElement("div");
+    tile.className="pick"+(preselect?" on":"");
+    tile.dataset.svc=s.service;
+    tile.onclick=()=>{ tile.classList.toggle("on");
+      if(tile.classList.contains("on")) pickedServices.add(s.service); else pickedServices.delete(s.service); };
+    const blurb = s.blurb || SERVICE_BLURB_FALLBACK[s.type] || s.type;
+    tile.innerHTML=`<span class="pick-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+      <span><span class="pick-name">${esc(s.service)}</span><div class="pick-type">${esc(blurb)}</div></span>`;
+    grid.appendChild(tile);
+  });
+}
+
+function onboardBackToStep1(){
+  document.getElementById("onboardStep1").style.display="";
+  document.getElementById("onboardStep2").style.display="none";
+  document.getElementById("onboardTitle").textContent="Welcome to GuardTowarr";
+  document.getElementById("onboardSub").textContent="Pick the services you want to monitor";
+}
+
+function onboardToStep2(){
+  const body=document.getElementById("onboardBody"); body.innerHTML="";
+  const picked=serviceCatalog.filter(s=>pickedServices.has(s.service));
+  if(!picked.length){ toast("Pick at least one service, or skip"); return; }
+  picked.forEach(s=>{
+    const fields=s.fields.map(f=>{
+      const val=esc((serviceMeta[s.service]&&f==="url")?(serviceMeta[s.service].url||s.url||""):(s.url&&f==="url"?s.url:""));
+      const hint=f==="url"?"Server address, e.g. http://192.168.1.50:7878":(FIELD_LABELS[f]||f);
+      return `<div class="field"><label>${FIELD_LABELS[f]||f}</label>
+        <input data-svc="${s.service}" data-field="${f}" type="${f==="password"?"password":"text"}" value="${val}" placeholder="${hint}"></div>`;
+    }).join("");
+    const ONBOARD_BETA = {
+      jellyfin: "Beta: Jellyfin support is limited to monitoring and live stats (now-playing) for now.",
+      tunarr: "Beta: covers reachability and Tunarr's own health checks for now."
+    };
+    const betaNote = ONBOARD_BETA[s.type]
+      ? `<div class="beta-note">${esc(ONBOARD_BETA[s.type])}</div>` : "";
+    body.insertAdjacentHTML("beforeend",
+      `<div class="group"><div class="group-h"><span class="gname">${esc(s.service)}</span></div>${betaNote}${fields}</div>`);
+  });
+  document.getElementById("onboardStep1").style.display="none";
+  document.getElementById("onboardStep2").style.display="";
+  document.getElementById("onboardTitle").textContent="Enter your details";
+  document.getElementById("onboardSub").textContent="Address and credentials for the services you picked";
+}
+
+async function skipOnboard(){
+  // mark setup done so it won't nag again; nothing else changes
+  const cfg=await (await fetch("/api/config")).json();
+  cfg.setup_complete=true;
+  await fetch("/api/config",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({config:cfg})});
+  document.getElementById("onboardOverlay").classList.remove("show");
+}
+
+async function saveOnboard(){
+  const cfg=await (await fetch("/api/config")).json();
+  // services the user did NOT pick get disabled so they don't prompt or show
+  serviceCatalog.forEach(s=>{
+    if(cfg.services[s.service]) cfg.services[s.service].disabled = !pickedServices.has(s.service);
+  });
+  // write entered credentials for picked services
+  document.querySelectorAll('#onboardBody input[data-field]').forEach(inp=>{
+    const v=inp.value.trim(); if(v) cfg.services[inp.dataset.svc][inp.dataset.field]=v;
+  });
+  cfg.setup_complete=true;
+  await fetch("/api/config",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({config:cfg})});
+  document.getElementById("onboardOverlay").classList.remove("show");
+  toast("Setup complete"); setTimeout(refresh,400);
+}
+function closeOnboard(){ document.getElementById("onboardOverlay").classList.remove("show"); }
+
+/* ---------- history ---------- */
+async function openHistory(){
+  document.getElementById("historyOverlay").classList.add("show");
+  const body=document.getElementById("historyBody");
+  body.innerHTML=`<div class="tor-empty">Loading…</div>`;
+  try{
+    const r=await (await fetch("/api/history")).json();
+    renderHistory(r);
+  }catch(e){ body.innerHTML=`<div class="tor-empty">Couldn't load history.</div>`; }
+}
+function closeHistory(){ document.getElementById("historyOverlay").classList.remove("show"); }
+function uptimeColor(p){ return p>=99?"var(--green)":p>=95?"var(--amber)":"var(--red)"; }
+
+function renderHistory(data){
+  const body=document.getElementById("historyBody");
+  const counts=data.counts||{}, recentAll=data.recent||[], uptime=data.uptime||{};
+  // hide services the user has turned off; their old history shouldn't clutter
+  // the view once they're disabled (serviceMeta carries the live disabled flag)
+  const isOff=n=>!!(serviceMeta[n]||{}).disabled;
+  // a card per service that has any history (outage counts OR an uptime figure)
+  const names=[...new Set([...Object.keys(counts), ...Object.keys(uptime)])].filter(n=>!isOff(n));
+  const recent=recentAll.filter(e=>!isOff(e.service));
+  let html="";
+  if(names.length){
+    html += `<div class="hist-cards">` + names.map(n=>{
+      const c=counts[n]||{day:0,week:0,month:0};
+      const up=uptime[n];
+      // 30-day uptime: label + % on one line, thin coloured bar under it (same footprint)
+      const upHtml = (up!=null) ? `<div class="hc-up"><span>30-day uptime</span><b>${up.toFixed(1)}%</b></div>
+        <div class="hc-upbar"><span style="width:${Math.max(0,Math.min(100,up))}%;background:${uptimeColor(up)}"></span></div>` : "";
+      return `<div class="hist-card"><div class="hc-name">${esc(n)}</div>${upHtml}
+        <div class="hc-row"><span>Down · 24h</span><b>${c.day}</b></div>
+        <div class="hc-row"><span>Down · 7d</span><b>${c.week}</b></div>
+        <div class="hc-row"><span>Down · 30d</span><b>${c.month}</b></div></div>`;
+    }).join("") + `</div>`;
+  } else {
+    html += `<div class="tor-empty" style="padding:20px">No outages recorded yet. Events appear here as services go down and recover.</div>`;
+  }
+  if(recent.length){
+    html += `<div class="hist-h">Recent events</div>`;
+    const evHtml = e=>{
+      const down = e.kind==="down";
+      const line = down ? `<b>${esc(e.service)}</b> went down: ${esc(e.summary||"")}`
+                        : `<b>${esc(e.service)}</b> recovered`;
+      return `<div class="hist-ev"><span class="he-dot ${down?'down':'recover'}"></span>
+        <div class="he-body"><div class="he-line">${line}</div>
+        <div class="he-time">${esc(e.time||"")}</div></div></div>`;
+    };
+    html += recent.slice(0,5).map(evHtml).join("");
+    const rest = recent.slice(5);
+    if(rest.length){
+      html += `<div class="hist-more" id="histMore">${rest.map(evHtml).join("")}</div>
+        <button class="hist-more-btn" id="histMoreBtn"
+          onclick="const m=document.getElementById('histMore'); const open=m.classList.toggle('show'); this.textContent= open?'Show fewer':'Show ${rest.length} more';">Show ${rest.length} more</button>`;
+    }
+  }
+  body.innerHTML=html;
+}
+
+/* ---------- search ---------- */
+function toggleSearch(){
+  searchOpen=!searchOpen;
+  if(searchOpen && torrentsOpen) closeTorrents();
+  document.getElementById("searchbar").classList.toggle("open",searchOpen);
+  syncMonitorVisibility();
+  if(searchOpen){ setTimeout(()=>document.getElementById("searchInput").focus(),300); }
+  else { document.getElementById("searchInput").value=""; document.getElementById("searchResults").innerHTML=""; }
+}
+function setKind(k){ searchKind=k;
+  // highlight whichever kind button is active
+  document.querySelectorAll(".kind-seg button").forEach(b=>b.classList.toggle("active", b.dataset.kind===k));
+  if(document.getElementById("searchInput").value.trim()) runSearch();
+}
+// Show only the kind buttons whose service is set up & enabled. If the kind the
+// user currently has selected is no longer available, fall back to the first one
+// that is, so the search box never sits on a dead option.
+function syncSearchKinds(){
+  let activeStillValid=false;
+  document.querySelectorAll(".kind-seg button").forEach(b=>{
+    const on = searchKinds.includes(b.dataset.kind);
+    b.style.display = on ? "" : "none";
+    if(on && b.dataset.kind===searchKind) activeStillValid=true;
+  });
+  if(!activeStillValid && searchKinds.length) setKind(searchKinds[0]);
+  // adjust the placeholder to match what's actually searchable
+  const names={movie:"movies",series:"shows",book:"books",music:"music"};
+  const avail=searchKinds.map(k=>names[k]||k);
+  const inp=document.getElementById("searchInput");
+  if(inp) inp.placeholder = avail.length ? `Search ${avail.join(", ")} to add…` : "Search to add…";
+}
+document.getElementById("searchInput").addEventListener("input",()=>{ clearTimeout(searchTimer); searchTimer=setTimeout(runSearch,450); });
+
+/* ---------- torrents (beta) ---------- */
+let torrentsOpen=false, torrentTab="downloading", torrentData={downloading:[],seeding:[]}, torrentTimer=null, torrentSource="qbittorrent";
+
+function syncMonitorVisibility(){
+  document.getElementById("monitorArea").classList.toggle("hidden", searchOpen||torrentsOpen);
+}
+function toggleTorrents(){
+  torrentsOpen=!torrentsOpen;
+  if(torrentsOpen && searchOpen) toggleSearch();
+  document.getElementById("torrentsArea").style.display = torrentsOpen?"block":"none";
+  syncMonitorVisibility();
+  if(torrentsOpen){ torrentTab="downloading"; updateTorrentTabUI(); loadTorrents();
+    torrentTimer=setInterval(loadTorrents,5000); }   // live-ish while open
+  else { clearInterval(torrentTimer); torrentTimer=null; }
+}
+function closeTorrents(){ if(torrentsOpen) toggleTorrents(); }
+function setTorrentTab(t){ torrentTab=t; updateTorrentTabUI(); renderTorrents(); }
+function updateTorrentTabUI(){
+  document.getElementById("torDownloading").classList.toggle("active",torrentTab==="downloading");
+  document.getElementById("torSeeding").classList.toggle("active",torrentTab==="seeding");
+}
+function fmtBytes(b){ if(!b) return "0 B"; const u=["B","KB","MB","GB","TB"]; let i=0,n=b;
+  while(n>=1024&&i<u.length-1){n/=1024;i++;} return n.toFixed(n>=10||i===0?0:1)+" "+u[i]; }
+function fmtEta(s){ if(!s||s>=8640000) return "∞"; const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);
+  return h?`${h}h ${m}m`:`${m}m`; }
+
+async function loadTorrents(){
+  if(!torrentsOpen) return;
+  try{
+    const r=await (await fetch("/api/torrents",{method:"POST"})).json();
+    if(!r.ok){ document.getElementById("torrentsList").innerHTML=`<div class="tor-empty">${esc(r.error||"Couldn't load torrents")}</div>`; return; }
+    torrentData={downloading:r.downloading||[],seeding:r.seeding||[]};
+    torrentSource=r.source||"qbittorrent";
+    renderTorrents();
+  }catch(e){ document.getElementById("torrentsList").innerHTML=`<div class="tor-empty">Couldn't load torrents.</div>`; }
+}
+function renderTorrents(){
+  const box=document.getElementById("torrentsList");
+  const fallback = torrentSource==="arr_queue";
+
+  // In fallback mode the *arr queue has no seeding data
+  if(fallback && torrentTab==="seeding"){
+    box.innerHTML=`<div class="tor-empty">Seeding isn't available without qBittorrent.<br>
+      Showing the Radarr/Sonarr download queue, which only tracks active downloads.</div>`;
+    return;
+  }
+
+  const list=torrentData[torrentTab]||[];
+  const notice = fallback
+    ? `<div class="tor-notice">qBittorrent not configured; showing the Radarr/Sonarr download queue.</div>` : "";
+  if(!list.length){ box.innerHTML=notice+`<div class="tor-empty">No ${torrentTab} torrents.</div>`; return; }
+
+  box.innerHTML=notice+'<div class="tor-list">'+list.map(t=>{
+    const done=t.progress>=100;
+    let stats;
+    if(torrentTab==="downloading"){
+      if(fallback){
+        // queue mode: no live speed, but show progress, size and the real client
+        stats = `<span><b>${t.progress}%</b></span>
+                 <span>${fmtBytes(t.size)}</span>
+                 ${t.client?`<span>via <b>${esc(t.client)}</b></span>`:""}
+                 ${t.app?`<span>${esc(t.app)}</span>`:""}`;
+      }else{
+        stats = `<span><b>${t.progress}%</b></span>
+                 <span>↓ <b>${fmtBytes(t.dlspeed)}/s</b></span>
+                 <span>${fmtBytes(t.size)}</span>
+                 <span>ETA ${fmtEta(t.eta)}</span>
+                 <span>${t.seeds} seeds</span>`;
+      }
+    }else{
+      stats = `<span>↑ <b>${fmtBytes(t.upspeed)}/s</b></span>
+               <span>Ratio <b>${t.ratio}</b></span>
+               <span>${fmtBytes(t.size)}</span>
+               <span>${t.peers} peers</span>`;
+    }
+    return `<div class="tor">
+      <div class="tor-name">${esc(t.name)}</div>
+      <div class="tor-bar ${done?"done":""}"><span style="width:${Math.min(100,t.progress)}%"></span></div>
+      <div class="tor-stats">${stats}</div></div>`;
+  }).join("")+'</div>';
+}
+
+async function runSearch(){
+  const term=document.getElementById("searchInput").value.trim();
+  const box=document.getElementById("searchResults");
+  if(!term){ box.innerHTML=""; return; }
+  box.innerHTML=`<div class="search-status">Searching…</div>`;
+  try{
+    const r=await (await fetch("/api/search",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({kind:searchKind,term})})).json();
+    if(!r.ok){ box.innerHTML=`<div class="search-status">${esc(r.error||"Search failed")}</div>`; return; }
+    if(!r.results.length){ box.innerHTML=`<div class="search-status">No results for “${esc(term)}”.</div>`; return; }
+    box.innerHTML='<div class="results">'+r.results.map((m,i)=>{
+      window._results=r.results;
+      const icon={movie:"🎬",series:"📺",book:"📚",music:"🎵"}[searchKind]||"🔍";
+      const img=m.poster?`<div class="img" style="background-image:url('${esc(m.poster)}')"></div>`:`<div class="img ph">${icon}</div>`;
+      const tag=m.already?`<span class="tag">In library</span>`:"";
+      return `<div class="poster" id="poster-${i}" onclick="addMedia(${i})">${img}${tag}
+        <div class="meta"><div class="pt">${esc(m.title)}</div><div class="py">${esc(String(m.year||""))}</div></div></div>`;
+    }).join("")+'</div>';
+  }catch(e){ box.innerHTML=`<div class="search-status">Search failed.</div>`; }
+}
+
+let pendingAdd = null;  // { i, item }
+
+async function addMedia(i){
+  const item=(window._results||[])[i]; if(!item) return;
+  if(item.already){ toast(`${item.title} is already in your library`); return; }
+  // Books and music are searchable, but adding them goes through a different
+  // (author/artist-based) flow that isn't wired up yet, so for now we just
+  // confirm the match was found rather than pretending to add it.
+  if(searchKind==="book" || searchKind==="music"){
+    toast(`Found “${item.title}”. Add it from ${searchKind==="book"?"Readarr":"Lidarr"} directly for now.`);
+    return;
+  }
+  pendingAdd = { i, item };
+
+  // fill the confirm modal
+  document.getElementById("confirmTitle").textContent = `Add “${item.title}”?`;
+  document.getElementById("confirmSub").textContent =
+    `${item.year||""} · will be added to ${searchKind==="movie"?"Radarr":"Sonarr"} and a download search started.`;
+  const sel=document.getElementById("profileSelect");
+  sel.innerHTML=`<option>Loading profiles…</option>`; sel.disabled=true;
+  document.getElementById("confirmAddBtn").disabled=true;
+  document.getElementById("confirmOverlay").classList.add("show");
+
+  // load quality profiles + remembered default
+  try{
+    const r=await (await fetch("/api/profiles",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({kind:searchKind})})).json();
+    if(!r.ok || !r.profiles.length){
+      sel.innerHTML=`<option value="">${esc(r.error||"No profiles found")}</option>`;
+      return;
+    }
+    const def = r.default;  // remembered choice (may be null)
+    sel.innerHTML = r.profiles.map(p=>
+      `<option value="${p.id}" ${p.id===def?"selected":""}>${esc(p.name)}</option>`).join("");
+    // if no remembered default, leave first selected (browser default)
+    sel.disabled=false;
+    document.getElementById("confirmAddBtn").disabled=false;
+  }catch(e){ sel.innerHTML=`<option value="">Couldn't load profiles</option>`; }
+}
+
+function closeConfirm(){ document.getElementById("confirmOverlay").classList.remove("show"); pendingAdd=null; }
+
+async function confirmAdd(){
+  if(!pendingAdd) return;
+  const { i, item } = pendingAdd;
+  const sel=document.getElementById("profileSelect");
+  const profileId = sel.value ? parseInt(sel.value) : null;
+  const btn=document.getElementById("confirmAddBtn");
+  btn.disabled=true; btn.textContent="Adding…";
+  const r=await (await fetch("/api/add",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({kind:searchKind,item,profile_id:profileId})})).json();
+  btn.disabled=false; btn.textContent="Add";
+  closeConfirm();
+  if(r.ok){
+    const card=document.getElementById("poster-"+i);
+    if(card){ card.classList.add("added"); card.insertAdjacentHTML("beforeend",`<span class="tag">Added ✓</span>`); }
+    toast(`Added ${item.title}, searching for downloads`);
+  } else toast("Couldn't add: "+(r.error||""));
+}
+
+/* close overlays on backdrop click / Esc */
+["settingsOverlay","onboardOverlay","confirmOverlay","historyOverlay","statsOverlay","helpOverlay"].forEach(id=>{
+  document.getElementById(id).addEventListener("click",e=>{
+    if(e.target.id===id){
+      if(id==="settingsOverlay") closeSettings();
+      else document.getElementById(id).classList.remove("show");
+    }
+  });
+});
+document.addEventListener("keydown",e=>{
+  // Esc closes whatever's open
+  if(e.key==="Escape"){
+    const confirmShown=document.getElementById("confirmOverlay").classList.contains("show");
+    const histShown=document.getElementById("historyOverlay").classList.contains("show");
+    const setShown=document.getElementById("settingsOverlay").classList.contains("show");
+    const statsShown=document.getElementById("statsOverlay").classList.contains("show");
+    const helpShown=document.getElementById("helpOverlay").classList.contains("show");
+    const anyModal=settingsOpen()||confirmShown||histShown||statsShown||helpShown;
+    if(setShown) closeSettings();   // reverts any live theme preview
+    document.getElementById("onboardOverlay").classList.remove("show");
+    document.getElementById("confirmOverlay").classList.remove("show");
+    document.getElementById("historyOverlay").classList.remove("show");
+    document.getElementById("statsOverlay").classList.remove("show");
+    document.getElementById("helpOverlay").classList.remove("show");
+    if(searchOpen && !anyModal) toggleSearch();
+    if(torrentsOpen && !anyModal) closeTorrents();
+    return;
+  }
+  // shortcuts: ignore while typing in a field or when a modal is open
+  const tag=(e.target.tagName||"").toLowerCase();
+  if(tag==="input"||tag==="textarea"||tag==="select"||e.metaKey||e.ctrlKey||e.altKey) return;
+  if(settingsOpen()||document.getElementById("confirmOverlay").classList.contains("show")
+     ||document.getElementById("historyOverlay").classList.contains("show")
+     ||document.getElementById("publicLoginOverlay").classList.contains("show")) return;
+  const searchAllowed = !GT_PUBLIC || GT_ALLOW_REQUESTS;
+  if(e.key==="/"&&searchAllowed){ e.preventDefault(); if(!searchOpen) toggleSearch(); else document.getElementById("searchInput").focus(); }
+  else if(e.key==="r"||e.key==="R"){ manualRefresh(); }
+  else if((e.key==="s"||e.key==="S")&&!GT_PUBLIC){ openSettings(); }
+  else if(e.key==="h"||e.key==="H"){ openHistory(); }
+});
+
+applyPublicMode();
+showSkeletons();
+refresh();
+setInterval(refresh, 15000);
+checkUpdate();
+setInterval(checkUpdate, 6*3600*1000);  // re-check a few times a day; backend caps actual API hits to once daily
+</script>
+</body>
+</html>
