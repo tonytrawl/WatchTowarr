@@ -4,7 +4,7 @@
 
 **The watchtower for your media stack. It doesn't just tell you what broke, it helps you fix it.**
 
-Monitors **Radarr · Sonarr · Prowlarr · Readarr · Lidarr · Plex · Jellyfin · qBittorrent · Ombi · Overseerr · Jellyseerr · Tunarr** in one place.
+Monitors **Radarr · Sonarr · Prowlarr · Readarr · Lidarr · Plex · Jellyfin · qBittorrent · Ombi · Seerr  · Tunarr** in one place.
 
 [![Docker Link](https://img.shields.io/badge/Docker-repo-blue?logo=docker)](https://hub.docker.com/r/tonytrawl/guardtowarr)
 [![Download](https://img.shields.io/badge/download-latest%20release-e5a00d)](../../releases/latest)
