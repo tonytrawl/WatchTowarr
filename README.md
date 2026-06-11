@@ -44,7 +44,7 @@ Monitors **Radarr · Sonarr · Prowlarr · Readarr · Lidarr · Plex · Jellyfin
 
 There are plenty of dashboards that show your services as green or red dots. GuardTowarr is built to do the part that actually saves you time: figure out what's wrong and help you fix it.
 
-- **It diagnoses, it doesn't just ping.** It logs into each app and reads that app's own health, so it catches things that are technically "up" but quietly broken (no indexers, a dead download client, a stalled or failed download).
+- **It diagnoses, it doesn't just ping.** It logs into each app and reads that app's own health, so it catches things that are technically "up" but quietly broken (no indexers, a dead download client, a stalled or failed download, so much more).
 - **It fixes, not just reports.** Common problems get one-click actions right on the card: test download clients, re-test indexers, re-check or re-announce a stalled torrent, or remove and re-search a genuinely bad download. Nothing happens on its own; every fix is a button you press.
 - **It understands the whole stack, not one app.** The full *arr lineup, Plex and Jellyfin, qBittorrent, the request apps, and Tunarr, all in one screen instead of a tab per tool.
 - **It runs off your server on purpose.** Put it on your everyday PC and it can tell you when the server itself goes down, not just when an app does.
