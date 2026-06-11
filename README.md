@@ -46,7 +46,7 @@ There are plenty of dashboards that show your services as green or red dots. Gua
 
 - **It diagnoses, it doesn't just ping.** It logs into each app and reads that app's own health, so it catches things that are technically "up" but quietly broken (no indexers, a dead download client, a stalled or failed download).
 - **It fixes, not just reports.** Common problems get one-click actions right on the card: test download clients, re-test indexers, re-check or re-announce a stalled torrent, or remove and re-search a genuinely bad download. Nothing happens on its own; every fix is a button you press.
-- **It understands the whole stack, not one app.** The full *arr lineup, Plex and Jellyfin, qBittorrent, the request apps, and Tunarr, all in one calm screen instead of a tab per tool.
+- **It understands the whole stack, not one app.** The full *arr lineup, Plex and Jellyfin, qBittorrent, the request apps, and Tunarr, all in one screen instead of a tab per tool.
 - **It runs off your server on purpose.** Put it on your everyday PC and it can tell you when the server itself goes down, not just when an app does.
 - **It's genuinely lightweight.** Two files and the Python standard library. No database, no heavy dependencies.
 - **Its alerts respect your time.** Edge-triggered (no spam while something stays down), with quiet hours, a grace period so brief blips stay quiet, and one summary instead of a flood when the whole stack reboots.
