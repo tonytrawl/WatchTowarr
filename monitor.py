@@ -50,7 +50,6 @@ DISMISS_FILE = os.path.join(DATA_DIR, "dismissed.json")
 PORT = int(os.environ.get("GUARDTOWARR_PORT", "9595"))  # 9595: avoids Readarr's 8787 and other *arr defaults
 POLL_INTERVAL = 30  # seconds (default)
 
-# Bump this when you cut a new GitHub release (must match the release tag, e.g. v1.0.0).
 CURRENT_VERSION = "v1.4.0"
 GITHUB_REPO = "tonytrawl/GuardTowarr"
 RELEASES_API = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
